@@ -1,9 +1,9 @@
 <package>
   <description>
-    Controller to publish joint state
+    Controller to publish state of force-torque sensors
   </description>
-  <author>Wim Meeussen</author>
-  <license>BSD</license>
+  <author>Adolfo Rodriguez Tsouroukdissian</author>
+  <license>Modified BSD</license>
   <review status="unreviewed" notes=""/>
   <url>https://github.com/ros-controls/ros_controllers/wiki</url>
 
@@ -12,10 +12,10 @@
   <depend package="hardware_interface"/>
   <depend package="pluginlib"/>
   <depend package="controller_interface"/>
-  <depend package="sensor_msgs"/>
+  <depend package="geometry_msgs"/>
 
   <export>
-    <controller_interface plugin="${prefix}/joint_state_plugin.xml" />
+    <controller_interface plugin="${prefix}/force_torque_sensor_plugin.xml" />
   </export>
 
 </package>

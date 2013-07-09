@@ -1,13 +1,14 @@
 <package>
   <name>effort_controllers</name>
-  <version>1.0.0</version>
+  <version>0.4.0</version>
   <description>effort_controllers</description>
   <maintainer email="vijay@hidof.com">Vijay Pradeep</maintainer>
 
   <license>BSD</license>
 
-  <url type="website">http://ros.org/wiki/effort_controllers</url>
-  <!-- <url type="bugtracker"></url> -->
+  <url type="website">https://github.com/ros-controls/ros_controllers/wiki</url>
+  <url type="bugtracker">https://github.com/ros-controls/ros_controllers/issues</url>
+  <url type="repository">https://github.com/ros-controls/ros_controllers</url>
 
   <author>Vijay Pradeep</author>
 

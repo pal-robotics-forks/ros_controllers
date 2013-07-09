@@ -1,9 +1,9 @@
 <package>
   <description>
-    Controller to publish joint state
+    Controller to publish state of IMU sensors
   </description>
-  <author>Wim Meeussen</author>
-  <license>BSD</license>
+  <author>Adolfo Rodriguez Tsouroukdissian</author>
+  <license>Modified BSD</license>
   <review status="unreviewed" notes=""/>
   <url>https://github.com/ros-controls/ros_controllers/wiki</url>
 
@@ -15,7 +15,7 @@
   <depend package="sensor_msgs"/>
 
   <export>
-    <controller_interface plugin="${prefix}/joint_state_plugin.xml" />
+    <controller_interface plugin="${prefix}/imu_sensor_plugin.xml" />
   </export>
 
 </package>
