@@ -101,7 +101,6 @@ inline void JointTrajectoryController::preemptActiveGoal()
   }
 }
 
-
 // Temporary stuff
 //struct JointTolerance {}; // TODO: Implement!
 
