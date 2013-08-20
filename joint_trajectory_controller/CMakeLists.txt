@@ -43,6 +43,7 @@ if(USE_ROSBUILD)
   target_link_libraries(init_joint_trajectory_test      pthread)
   target_link_libraries(tolerances_test                 pthread)
   target_link_libraries(joint_trajectory_controller     pthread)
+  target_link_libraries(rrbot                           pthread)
 else()
   # Load catkin and all dependencies required for this package
   find_package(catkin REQUIRED COMPONENTS actionlib
