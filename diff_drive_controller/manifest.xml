@@ -12,6 +12,7 @@
    <depend package="roscpp" />
    <depend package="urdf"/>
 
+  <depend package="angles"/>
   <depend package="controller_interface"/>
   <depend package="forward_command_controller"/>
   <depend package="realtime_tools"/>
