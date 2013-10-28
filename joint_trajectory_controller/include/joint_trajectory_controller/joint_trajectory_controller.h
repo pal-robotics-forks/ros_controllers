@@ -9,7 +9,7 @@
 //   * Redistributions in binary form must reproduce the above copyright
 //     notice, this list of conditions and the following disclaimer in the
 //     documentation and/or other materials provided with the distribution.
-//   * Neither the name of hiDOF, Inc. nor the names of its
+//   * Neither the name of PAL Robotics S.L. nor the names of its
 //     contributors may be used to endorse or promote products derived from
 //     this software without specific prior written permission.
 //
@@ -77,9 +77,9 @@ namespace joint_trajectory_controller
 {
 
 /**
- * \brief Controller for executing joint-space trajectories on a set of joints.
+ * \brief Controller for executing joint-space trajectories on a group of joints.
  *
- * TODO: Point to detailed documentation (ros wiki page?)
+ * \note Non-developer documentation and usage instructions can be found in the package's ROS wiki page.
  *
  * \tparam SegmentImpl Trajectory segment representation to use. The type must comply with the following structure:
  * \code
@@ -129,7 +129,7 @@ public:
 
   /** \name Non Real-Time Safe Functions
    *\{*/
-  bool init(hardware_interface::PositionJointInterface* hw, ros::NodeHandle& root_nh, ros::NodeHandle& controller_nh);
+  bool init(HardwareInterface* hw, ros::NodeHandle& root_nh, ros::NodeHandle& controller_nh);
   /*\}*/
 
   /** \name Real-Time Safe Functions
@@ -201,7 +201,7 @@ private:
   ros::Duration state_publisher_period_;
   ros::Duration action_monitor_period_;
 
-  typename Segment::Time hold_trajectory_duration_;
+  typename Segment::Time stop_trajectory_duration_;
 
   // ROS API
   ros::NodeHandle    controller_nh_;

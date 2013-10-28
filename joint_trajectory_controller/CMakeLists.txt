@@ -63,7 +63,7 @@ else()
       trajectory_msgs
       rostest
       controller_manager
-      xacro
+#       xacro
   )
 
   include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
@@ -136,6 +136,9 @@ else()
     LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
     RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
     )
+
+  install(FILES ros_control_plugins.xml
+    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
   # TODO: Install test resource files as well?
 endif()

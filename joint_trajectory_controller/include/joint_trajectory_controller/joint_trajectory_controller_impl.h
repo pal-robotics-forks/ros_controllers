@@ -9,7 +9,7 @@
 //   * Redistributions in binary form must reproduce the above copyright
 //     notice, this list of conditions and the following disclaimer in the
 //     documentation and/or other materials provided with the distribution.
-//   * Neither the name of hiDOF, Inc. nor the names of its
+//   * Neither the name of PAL Robotics S.L. nor the names of its
 //     contributors may be used to endorse or promote products derived from
 //     this software without specific prior written permission.
 //
@@ -79,17 +79,22 @@ std::vector<std::string> getStrings(const ros::NodeHandle& nh, const std::string
 boost::shared_ptr<urdf::Model> getUrdf(const ros::NodeHandle& nh, const std::string& param_name)
 {
   boost::shared_ptr<urdf::Model> urdf(new urdf::Model);
+
   std::string urdf_str;
-  if (!nh.getParam(param_name, urdf_str))
+  // Check for robot_description in proper namespace
+  if (nh.getParam(param_name, urdf_str))
   {
-    ROS_ERROR_STREAM("Could not find '" << param_name << "' parameter (namespace: " <<
-                     nh.getNamespace() << ").");
-    return boost::shared_ptr<urdf::Model>();
+    if (!urdf->initString(urdf_str))
+    {
+      ROS_ERROR_STREAM("Failed to parse URDF contained in '" << param_name << "' parameter (namespace: " <<
+        nh.getNamespace() << ").");
+      return boost::shared_ptr<urdf::Model>();
+    }
   }
-  if (!urdf->initString(urdf_str))
+  // Check for robot_description in root
+  else if (!urdf->initParam("robot_description"))
   {
-    ROS_ERROR_STREAM("Failed to parse URDF contained in '" << param_name << "' parameter (namespace: " <<
-                     nh.getNamespace() << ").");
+    ROS_ERROR_STREAM("Failed to parse URDF contained in '" << param_name << "' parameter");
     return boost::shared_ptr<urdf::Model>();
   }
   return urdf;
@@ -230,10 +235,9 @@ JointTrajectoryController()
 {}
 
 template <class SegmentImpl, class HardwareInterface>
-bool JointTrajectoryController<SegmentImpl, HardwareInterface>::
-init(hardware_interface::PositionJointInterface* hw,
-     ros::NodeHandle&                            root_nh,
-     ros::NodeHandle&                            controller_nh)
+bool JointTrajectoryController<SegmentImpl, HardwareInterface>::init(HardwareInterface* hw,
+                                                                     ros::NodeHandle&   root_nh,
+                                                                     ros::NodeHandle&   controller_nh)
 {
   using namespace internal;
 
@@ -256,9 +260,16 @@ init(hardware_interface::PositionJointInterface* hw,
   ROS_DEBUG_STREAM_NAMED(name_, "Action status changes will be monitored at " << action_monitor_rate << "Hz.");
 
   // Hold trajectory duration
-  hold_trajectory_duration_ = 0.5;
-  controller_nh_.getParam("hold_trajectory_duration", hold_trajectory_duration_);
-  ROS_DEBUG_STREAM_NAMED(name_, "Hold trajectory has a duration of " << hold_trajectory_duration_ << "s.");
+  stop_trajectory_duration_ = 0.5;
+  if (!controller_nh_.getParam("stop_trajectory_duration", stop_trajectory_duration_))
+  {
+    // TODO: Remove this check/warning in Indigo
+    if (controller_nh_.getParam("hold_trajectory_duration", stop_trajectory_duration_))
+    {
+      ROS_WARN("The 'hold_trajectory_duration' has been deprecated in favor of the 'stop_trajectory_duration' parameter. Please update your controller configuration.");
+    }
+  }
+  ROS_DEBUG_STREAM_NAMED(name_, "Stop trajectory has a duration of " << stop_trajectory_duration_ << "s.");
 
   // List of controlled joints
   joint_names_ = getStrings(controller_nh_, "joints");
@@ -296,10 +307,10 @@ init(hardware_interface::PositionJointInterface* hw,
   }
 
   assert(joints_.size() == angle_wraparound_.size());
-  ROS_INFO_STREAM_NAMED(name_, "Initialized controller '" << name_ << "' with:" <<
-                        "\n- Number of joints: " << joints_.size() <<
-                        "\n- Hardware interface type: '" << this->getHardwareInterfaceType() << "'" <<
-                        "\n- Trajectory segment type: '" << hardware_interface::internal::demangledTypeName<SegmentImpl>() << "'");
+  ROS_DEBUG_STREAM_NAMED(name_, "Initialized controller '" << name_ << "' with:" <<
+                         "\n- Number of joints: " << joints_.size() <<
+                         "\n- Hardware interface type: '" << this->getHardwareInterfaceType() << "'" <<
+                         "\n- Trajectory segment type: '" << hardware_interface::internal::demangledTypeName<SegmentImpl>() << "'");
 
   // Default tolerances
   ros::NodeHandle tol_nh(controller_nh_, "constraints");
@@ -381,8 +392,8 @@ update(const ros::Time& time, const ros::Duration& period)
     current_state_.velocity[i] = joints_[i].getVelocity();
     // There's no acceleration data available in a joint handle
 
-    state_error_.position[i] = current_state_.position[i] - desired_state_.position[i];
-    state_error_.velocity[i] = current_state_.velocity[i] - desired_state_.velocity[i];
+    state_error_.position[i] = desired_state_.position[i] - current_state_.position[i];
+    state_error_.velocity[i] = desired_state_.velocity[i] - current_state_.velocity[i];
     state_error_.acceleration[i] = 0.0;
   }
 
@@ -631,8 +642,8 @@ setHoldPosition(const ros::Time& time)
   assert(1 == hold_trajectory_ptr_->size());
 
   const typename Segment::Time start_time  = time.toSec();
-  const typename Segment::Time end_time    = time.toSec() + hold_trajectory_duration_;
-  const typename Segment::Time end_time_2x = time.toSec() + 2.0 * hold_trajectory_duration_;
+  const typename Segment::Time end_time    = time.toSec() + stop_trajectory_duration_;
+  const typename Segment::Time end_time_2x = time.toSec() + 2.0 * stop_trajectory_duration_;
 
   // Create segment that goes from current (pos,vel) to (pos,-vel)
   const unsigned int n_joints = joints_.size();
