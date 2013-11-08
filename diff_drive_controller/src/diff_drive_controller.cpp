@@ -197,8 +197,8 @@ namespace diff_drive_controller{
       }
       else
       {
-        const auto ws = wheel_separation_multiplier_ * wheel_separation_;
-        const auto wr = wheel_radius_multiplier_     * wheel_radius_;
+        const double ws = wheel_separation_multiplier_ * wheel_separation_;
+        const double wr = wheel_radius_multiplier_     * wheel_radius_;
 
         const double vel_right = (curr_cmd.lin + curr_cmd.ang * ws / 2.0)/wr;
         const double vel_left  = (curr_cmd.lin - curr_cmd.ang * ws / 2.0)/wr;
