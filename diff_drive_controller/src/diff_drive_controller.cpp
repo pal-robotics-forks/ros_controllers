@@ -124,7 +124,7 @@ namespace diff_drive_controller{
         wheel_radius_(0.0),
         wheel_separation_multiplier_(1.0),
         wheel_radius_multiplier_(1.0),
-        cmd_vel_old_threshold_(1.0)
+        cmd_vel_timeout_(0.5)
     {
     }
 
@@ -165,9 +165,9 @@ namespace diff_drive_controller{
       ROS_INFO_STREAM_NAMED(name_, "Wheel radius will be multiplied by "
                             << wheel_radius_multiplier_ << ".");
 
-      controller_nh.param("cmd_vel_old_threshold", cmd_vel_old_threshold_, cmd_vel_old_threshold_);
+      controller_nh.param("cmd_vel_timeout_", cmd_vel_timeout_, cmd_vel_timeout_);
       ROS_INFO_STREAM_NAMED(name_, "Velocity commands will be considered old if they are older than "
-                            << cmd_vel_old_threshold_ << "s.");
+                            << cmd_vel_timeout_ << "s.");
 
       if(!setOdomParamsFromUrdf(root_nh, left_wheel_name, right_wheel_name))
         return false;
@@ -191,16 +191,17 @@ namespace diff_drive_controller{
       // MOVE ROBOT
       // command the wheels according to the messages from the cmd_vel topic
       const Commands curr_cmd = *(command_.readFromRT());
-      if(time - curr_cmd.stamp > ros::Duration(cmd_vel_old_threshold_))
+      if(time - curr_cmd.stamp > ros::Duration(cmd_vel_timeout_))
       {
         brake();
       }
       else
       {
-        const double vel_right =
-            (curr_cmd.lin + curr_cmd.ang * wheel_separation_ / 2.0)/wheel_radius_;
-        const double vel_left =
-            (curr_cmd.lin - curr_cmd.ang * wheel_separation_ / 2.0)/wheel_radius_;
+        const double ws = wheel_separation_multiplier_ * wheel_separation_;
+        const double wr = wheel_radius_multiplier_     * wheel_radius_;
+
+        const double vel_right = (curr_cmd.lin + curr_cmd.ang * ws / 2.0)/wr;
+        const double vel_left  = (curr_cmd.lin - curr_cmd.ang * ws / 2.0)/wr;
         left_wheel_joint_.setCommand(vel_left);
         right_wheel_joint_.setCommand(vel_right);
       }
@@ -295,8 +296,8 @@ namespace diff_drive_controller{
     double wheel_separation_multiplier_;
     double wheel_radius_multiplier_;
 
-    /// Threshold to consider cmd_vel commands old
-    double cmd_vel_old_threshold_;
+    /// Velocity commands timeout
+    double cmd_vel_timeout_;
 
   private:
     /*
@@ -379,10 +380,12 @@ namespace diff_drive_controller{
       }
 
       /// Set wheel params for the odometry computation
-      odometry_.setWheelParams(wheel_separation_, wheel_radius_);
+      const double ws = wheel_separation_multiplier_ * wheel_separation_;
+      const double wr = wheel_radius_multiplier_     * wheel_radius_;
+      odometry_.setWheelParams(ws, wr);
       ROS_INFO_STREAM_NAMED(name_,
-                            "Odometry params : wheel separation " << wheel_separation_
-                            << ", wheel radius " << wheel_radius_);
+                            "Odometry params : wheel separation " << ws
+                            << ", wheel radius " << wr);
       return true;
     }
 
