@@ -47,7 +47,14 @@ T clamp(T x, T min, T max)
 namespace diff_drive_controller
 {
 
-  SpeedLimiter::SpeedLimiter(bool has_velocity_limits, bool has_acceleration_limits, double min_velocity, double max_velocity, double min_acceleration, double max_acceleration)
+  SpeedLimiter::SpeedLimiter(
+    bool has_velocity_limits,
+    bool has_acceleration_limits,
+    double min_velocity,
+    double max_velocity,
+    double min_acceleration,
+    double max_acceleration
+  )
   : has_velocity_limits_(has_velocity_limits),
     has_acceleration_limits_(has_acceleration_limits),
     min_velocity_(min_velocity),
