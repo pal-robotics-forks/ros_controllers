@@ -72,28 +72,28 @@ namespace diff_drive_controller{
      * \param root_nh       Node handle at root namespace
      * \param controller_nh Node handle inside the controller namespace
      */
-    bool init(hardware_interface::VelocityJointInterface* hw,
-              ros::NodeHandle& root_nh,
-              ros::NodeHandle &controller_nh);
+    virtual bool init(hardware_interface::VelocityJointInterface* hw,
+                      ros::NodeHandle& root_nh,
+                      ros::NodeHandle& controller_nh);
 
     /**
      * \brief Updates controller, i.e. computes the odometry and sets the new velocity commands
      * \param time   Current time
      * \param period Time since the last called to update
      */
-    void update(const ros::Time& time, const ros::Duration& period);
+    virtual void update(const ros::Time& time, const ros::Duration& period);
 
     /**
      * \brief Starts controller
      * \param time Current time
      */
-    void starting(const ros::Time& time);
+    virtual void starting(const ros::Time& time);
 
     /**
      * \brief Stops controller
      * \param time Current time
      */
-    void stopping(const ros::Time& time);
+    virtual void stopping(const ros::Time& time);
 
   private:
     std::string name_;
