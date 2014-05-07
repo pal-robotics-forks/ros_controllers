@@ -197,8 +197,8 @@ namespace diff_drive_controller{
   void DiffDriveController::update(const ros::Time& time, const ros::Duration& period)
   {
     // COMPUTE AND PUBLISH ODOMETRY
-    const double& left_pos  = left_wheel_joint_.getPosition();
-    const double& right_pos = right_wheel_joint_.getPosition();
+    const double left_pos  = left_wheel_joint_.getPosition();
+    const double right_pos = right_wheel_joint_.getPosition();
     if (std::isnan(left_pos) || std::isnan(right_pos))
       return;
 
