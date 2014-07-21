@@ -98,9 +98,10 @@ namespace diff_drive_controller{
   private:
     std::string name_;
 
-    /// Publish rate related:
+    /// Odometry related:
     ros::Duration publish_period_;
     ros::Time last_state_publish_time_;
+    bool open_loop_;
 
     /// Hardware handles:
     hardware_interface::JointHandle left_wheel_joint_;
@@ -123,7 +124,6 @@ namespace diff_drive_controller{
     boost::shared_ptr<realtime_tools::RealtimePublisher<nav_msgs::Odometry> > odom_pub_;
     boost::shared_ptr<realtime_tools::RealtimePublisher<tf::tfMessage> > tf_odom_pub_;
     Odometry odometry_;
-    geometry_msgs::TransformStamped odom_frame_;
 
     /// Wheel separation, wrt the midpoint of the wheel width:
     double wheel_separation_;
@@ -141,7 +141,7 @@ namespace diff_drive_controller{
     /// Frame to use for the robot base:
     std::string base_frame_id_;
 
-    // speed limiters
+    // Speed limiters:
     Commands last_cmd_;
     SpeedLimiter limiter_lin_;
     SpeedLimiter limiter_ang_;
