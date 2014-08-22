@@ -2,6 +2,7 @@
  * Software License Agreement (BSD License)
  *
  *  Copyright (c) 2013, University of Colorado, Boulder
+ *  Copyright (c) 2014, PAL Robotics SL.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -32,7 +33,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Dave Coleman
+/* Author: Dave Coleman, Bence Magyar
    Desc:   Controller to allow joint controllers to easily switch modes between position, velocity, and effort-based control
 */
 
@@ -42,13 +43,30 @@
 
 namespace joint_mode_controller {
 
+  hardware_interface::JointCommandModes stringToMode(const std::string& s)
+  {
+    if(s == "hardware_interface/PositionJointInterface")
+        return hardware_interface::MODE_POSITION;
+    else if(s == "hardware_interface/VelocityJointInterface")
+        return hardware_interface::MODE_VELOCITY;
+    else if(s == "hardware_interface/EffortJointInterface")
+        return hardware_interface::MODE_EFFORT;
+    else
+    {
+      //TODO: what to do here?
+        ROS_FATAL_STREAM("Invalid mode to set joint to " << s);
+        return hardware_interface::MODE_OTHER;
+    }
+  }
+
 class JointModeController: public controller_interface::Controller<hardware_interface::JointModeInterface>
 {
 
 private:
-  boost::shared_ptr<hardware_interface::JointModeHandle> mode_handle_;
+  std::map<std::string, hardware_interface::JointCommandModes> joint_modes_;
 
-  int joint_mode_;
+  std::vector<hardware_interface::JointModeHandle> mode_handles_;
+  std::vector<hardware_interface::JointCommandModes> modes_;
 
 public:
   JointModeController()
@@ -60,26 +78,23 @@ public:
   bool init(
     hardware_interface::JointModeInterface *hw, ros::NodeHandle &nh)
   {
+    typedef std::map<std::string, std::string> map_s_s;
 
-    // Get handle name for this mode mechanism from the parameter server
-    std::string handle_name;
-    if (!nh.getParam("mode_handle", handle_name)) 
+    // Get the names of handles and their respective target modes
+    map_s_s joint_modes;
+    if (!nh.getParam("mode_handles", joint_modes))
     {
-      ROS_DEBUG_STREAM_NAMED("init","No mode_handle specified in namespace '" << nh.getNamespace() 
-        << "', defaulting to 'joint_mode'");
-      handle_name = "joint_mode"; // default name
+      ROS_DEBUG_STREAM_NAMED("init","No mode_handles specified in namespace '"
+                             << nh.getNamespace());
     }
 
-    // Get the joint mode, which we represent as an int for speed. User chooses what that mode actually represents
-    if (!nh.getParam("joint_mode", joint_mode_)) 
+    // Save the handles and parse mode names for usage in the starting() function
+    for(map_s_s::const_iterator i = joint_modes.begin(); i != joint_modes.end(); ++i)
     {
-      ROS_DEBUG_STREAM_NAMED("init","No joint_mode specified in namespace '" << nh.getNamespace() 
-        << "', defaulting to position");
-      joint_mode_ = hardware_interface::MODE_POSITION; // default joint mode
+      mode_handles_.push_back(hardware_interface::JointModeHandle(hw->getHandle(i->first)));
+      ROS_WARN_STREAM("Switching " << i->first << " to " << i->second);
+      modes_.push_back(stringToMode(i->second));
     }
-
-    // Save the mode interface handle for usage in the starting() function
-    mode_handle_.reset(new hardware_interface::JointModeHandle(hw->getHandle(handle_name)));
 
     return true;
   }
@@ -89,12 +104,12 @@ public:
 
   void starting(const ros::Time& time) 
   {
-    // The controller actually changes the mode when the controller is started, not when it is loaded
-    mode_handle_->setMode(joint_mode_);
-  };
+    // The controller changes the mode when the controller is started, not when it is loaded
+    for(size_t i=0; i<mode_handles_.size(); ++i)
+      mode_handles_[i].setMode(modes_[i]);
+  }
 
 };
-
 } // namespace
 
 PLUGINLIB_EXPORT_CLASS( joint_mode_controller::JointModeController, controller_interface::ControllerBase)
