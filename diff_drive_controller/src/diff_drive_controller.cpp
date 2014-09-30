@@ -116,6 +116,8 @@ namespace diff_drive_controller{
     , wheel_radius_multiplier_(1.0)
     , cmd_vel_timeout_(0.5)
     , base_frame_id_("base_link")
+    , enable_odom_tf_(true)
+    , wheel_joints_size_(0)
   {
   }
 
@@ -126,20 +128,28 @@ namespace diff_drive_controller{
     const std::string complete_ns = controller_nh.getNamespace();
     std::size_t id = complete_ns.find_last_of("/");
     name_ = complete_ns.substr(id + 1);
-    // Get joint names from the parameter server
-    std::string left_wheel_name, right_wheel_name;
 
-    bool res = controller_nh.hasParam("left_wheel");
-    if (!res || !controller_nh.getParam("left_wheel", left_wheel_name))
+    // Get joint names from the parameter server
+    std::vector<std::string> left_wheel_names, right_wheel_names;
+    if (!getWheelNames(controller_nh, "left_wheel", left_wheel_names) or
+        !getWheelNames(controller_nh, "right_wheel", right_wheel_names))
     {
-      ROS_ERROR_NAMED(name_, "Couldn't retrieve left wheel name from param server.");
       return false;
     }
-    res = controller_nh.hasParam("right_wheel");
-    if (!res || !controller_nh.getParam("right_wheel", right_wheel_name))
+
+    if (left_wheel_names.size() != right_wheel_names.size())
     {
-      ROS_ERROR_NAMED(name_, "Couldn't retrieve right wheel name from param server.");
+      ROS_ERROR_STREAM_NAMED(name_,
+          "#left wheels (" << left_wheel_names.size() << ") != " <<
+          "#right wheels (" << right_wheel_names.size() << ").");
       return false;
+    }
+    else
+    {
+      wheel_joints_size_ = left_wheel_names.size();
+
+      left_wheel_joints_.resize(wheel_joints_size_);
+      right_wheel_joints_.resize(wheel_joints_size_);
     }
 
     // Odometry related:
@@ -167,6 +177,9 @@ namespace diff_drive_controller{
     controller_nh.param("base_frame_id", base_frame_id_, base_frame_id_);
     ROS_INFO_STREAM_NAMED(name_, "Base frame_id set to " << base_frame_id_);
 
+    controller_nh.param("enable_odom_tf", enable_odom_tf_, enable_odom_tf_);
+    ROS_INFO_STREAM_NAMED(name_, "Publishing to tf is " << (enable_odom_tf_?"enabled":"disabled"));
+
     // Velocity and acceleration limits:
     controller_nh.param("linear/x/has_velocity_limits"    , limiter_lin_.has_velocity_limits    , limiter_lin_.has_velocity_limits    );
     controller_nh.param("linear/x/has_acceleration_limits", limiter_lin_.has_acceleration_limits, limiter_lin_.has_acceleration_limits);
@@ -182,17 +195,20 @@ namespace diff_drive_controller{
     controller_nh.param("angular/z/max_acceleration"       , limiter_ang_.max_acceleration       ,  limiter_ang_.max_acceleration      );
     controller_nh.param("angular/z/min_acceleration"       , limiter_ang_.min_acceleration       , -limiter_ang_.max_acceleration      );
 
-    if (!setOdomParamsFromUrdf(root_nh, left_wheel_name, right_wheel_name))
+    if (!setOdomParamsFromUrdf(root_nh, left_wheel_names[0], right_wheel_names[0]))
       return false;
 
     setOdomPubFields(root_nh, controller_nh);
 
     // Get the joint object to use in the realtime loop
-    ROS_INFO_STREAM_NAMED(name_,
-                          "Adding left wheel with joint name: " << left_wheel_name
-                          << " and right wheel with joint name: " << right_wheel_name);
-    left_wheel_joint_ = hw->getHandle(left_wheel_name);  // throws on failure
-    right_wheel_joint_ = hw->getHandle(right_wheel_name);  // throws on failure
+    for (int i = 0; i < wheel_joints_size_; ++i)
+    {
+      ROS_INFO_STREAM_NAMED(name_,
+                            "Adding left wheel with joint name: " << left_wheel_names[i]
+                            << " and right wheel with joint name: " << right_wheel_names[i]);
+      left_wheel_joints_[i] = hw->getHandle(left_wheel_names[i]);  // throws on failure
+      right_wheel_joints_[i] = hw->getHandle(right_wheel_names[i]);  // throws on failure
+    }
 
     sub_command_ = controller_nh.subscribe("cmd_vel", 1, &DiffDriveController::cmdVelCallback, this);
 
@@ -208,10 +224,20 @@ namespace diff_drive_controller{
     }
     else
     {
-      const double left_pos  = left_wheel_joint_.getPosition();
-      const double right_pos = right_wheel_joint_.getPosition();
-      if (std::isnan(left_pos) || std::isnan(right_pos))
-        return;
+      double left_pos  = 0.0;
+      double right_pos = 0.0;
+      for (size_t i = 0; i < wheel_joints_size_; ++i)
+      {
+        const double lp = left_wheel_joints_[i].getPosition();
+        const double rp = right_wheel_joints_[i].getPosition();
+        if (std::isnan(lp) || std::isnan(rp))
+          return;
+
+        left_pos  += lp;
+        right_pos += rp;
+      }
+      left_pos  /= wheel_joints_size_;
+      right_pos /= wheel_joints_size_;
 
       // Estimate linear and angular velocity using joint information
       odometry_.update(left_pos, right_pos, time);
@@ -238,7 +264,7 @@ namespace diff_drive_controller{
       }
 
       // Publish tf /odom frame
-      if (tf_odom_pub_->trylock())
+      if (enable_odom_tf_ && tf_odom_pub_->trylock())
       {
         geometry_msgs::TransformStamped& odom_frame = tf_odom_pub_->msg_.transforms[0];
         odom_frame.header.stamp = time;
@@ -276,8 +302,11 @@ namespace diff_drive_controller{
     const double vel_right = (curr_cmd.lin + curr_cmd.ang * ws / 2.0)/wr;
 
     // Set wheels velocities:
-    left_wheel_joint_.setCommand(vel_left);
-    right_wheel_joint_.setCommand(vel_right);
+    for (size_t i = 0; i < wheel_joints_size_; ++i)
+    {
+      left_wheel_joints_[i].setCommand(vel_left);
+      right_wheel_joints_[i].setCommand(vel_right);
+    }
   }
 
   void DiffDriveController::starting(const ros::Time& time)
@@ -298,8 +327,11 @@ namespace diff_drive_controller{
   void DiffDriveController::brake()
   {
     const double vel = 0.0;
-    left_wheel_joint_.setCommand(vel);
-    right_wheel_joint_.setCommand(vel);
+    for (size_t i = 0; i < wheel_joints_size_; ++i)
+    {
+      left_wheel_joints_[i].setCommand(vel);
+      right_wheel_joints_[i].setCommand(vel);
+    }
   }
 
   void DiffDriveController::cmdVelCallback(const geometry_msgs::Twist& command)
@@ -320,6 +352,59 @@ namespace diff_drive_controller{
     {
       ROS_ERROR_NAMED(name_, "Can't accept new commands. Controller is not running.");
     }
+  }
+
+  bool DiffDriveController::getWheelNames(ros::NodeHandle& controller_nh,
+                              const std::string& wheel_param,
+                              std::vector<std::string>& wheel_names)
+  {
+      XmlRpc::XmlRpcValue wheel_list;
+      if (!controller_nh.getParam(wheel_param, wheel_list))
+      {
+        ROS_ERROR_STREAM_NAMED(name_,
+            "Couldn't retrieve wheel param '" << wheel_param << "'.");
+        return false;
+      }
+
+      if (wheel_list.getType() == XmlRpc::XmlRpcValue::TypeArray)
+      {
+        if (wheel_list.size() == 0)
+        {
+          ROS_ERROR_STREAM_NAMED(name_,
+              "Wheel param '" << wheel_param << "' is an empty list");
+          return false;
+        }
+
+        for (int i = 0; i < wheel_list.size(); ++i)
+        {
+          if (wheel_list[i].getType() != XmlRpc::XmlRpcValue::TypeString)
+          {
+            ROS_ERROR_STREAM_NAMED(name_,
+                "Wheel param '" << wheel_param << "' #" << i <<
+                " isn't a string.");
+            return false;
+          }
+        }
+
+        wheel_names.resize(wheel_list.size());
+        for (int i = 0; i < wheel_list.size(); ++i)
+        {
+          wheel_names[i] = static_cast<std::string>(wheel_list[i]);
+        }
+      }
+      else if (wheel_list.getType() == XmlRpc::XmlRpcValue::TypeString)
+      {
+        wheel_names.push_back(wheel_list);
+      }
+      else
+      {
+        ROS_ERROR_STREAM_NAMED(name_,
+            "Wheel param '" << wheel_param <<
+            "' is neither a list of strings nor a string.");
+        return false;
+      }
+
+      return true;
   }
 
   bool DiffDriveController::setOdomParamsFromUrdf(ros::NodeHandle& root_nh,
