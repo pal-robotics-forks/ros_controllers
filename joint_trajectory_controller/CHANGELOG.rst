@@ -2,8 +2,8 @@
 Changelog for package joint_trajectory_controller
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.1 (2014-11-10)
+------------------
 * Add trajectory_interface headers to install target
 * Contributors: Adolfo Rodriguez Tsouroukdissian
 
