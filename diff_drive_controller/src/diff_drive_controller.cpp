@@ -119,6 +119,7 @@ namespace diff_drive_controller{
     , enable_odom_tf_(true)
     , wheel_joints_size_(0)
     , preserve_turning_radius_(true)
+    , publish_cmd_(true)
   {
   }
 
@@ -212,10 +213,16 @@ namespace diff_drive_controller{
     // Preserve turning radius if limiting velocity/acceleration/jerk:
     controller_nh.param("preserve_turning_radius", preserve_turning_radius_, preserve_turning_radius_);
 
+    // Publish limited velocity:
+    controller_nh.param("publish_cmd", publish_cmd_, publish_cmd_);
+
     if (!setOdomParamsFromUrdf(root_nh, left_wheel_names[0], right_wheel_names[0]))
       return false;
 
     setOdomPubFields(root_nh, controller_nh);
+
+
+    cmd_vel_pub_.reset(new realtime_tools::RealtimePublisher<geometry_msgs::TwistStamped>(controller_nh, "cmd_vel_out", 100));
 
     // Get the joint object to use in the realtime loop
     for (int i = 0; i < wheel_joints_size_; ++i)
@@ -317,6 +324,15 @@ namespace diff_drive_controller{
     }
     last1_cmd_ = last0_cmd_;
     last0_cmd_ = curr_cmd;
+
+    // Publish limited velocity:
+    if (publish_cmd_ && cmd_vel_pub_->trylock())
+    {
+      cmd_vel_pub_->msg_.header.stamp = time;
+      cmd_vel_pub_->msg_.twist.linear.x = curr_cmd.lin;
+      cmd_vel_pub_->msg_.twist.angular.z = curr_cmd.ang;
+      cmd_vel_pub_->unlockAndPublish();
+    }
 
     // Apply multipliers:
     const double ws = wheel_separation_multiplier_ * wheel_separation_;
