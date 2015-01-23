@@ -41,6 +41,7 @@
 #include <pluginlib/class_list_macros.h>
 
 #include <nav_msgs/Odometry.h>
+#include <geometry_msgs/TwistStamped.h>
 #include <tf/tfMessage.h>
 
 #include <realtime_tools/realtime_buffer.h>
@@ -119,6 +120,7 @@ namespace diff_drive_controller{
     realtime_tools::RealtimeBuffer<Commands> command_;
     Commands command_struct_;
     ros::Subscriber sub_command_;
+    boost::shared_ptr<realtime_tools::RealtimePublisher<geometry_msgs::TwistStamped> > cmd_vel_pub_;
 
     /// Odometry related:
     boost::shared_ptr<realtime_tools::RealtimePublisher<nav_msgs::Odometry> > odom_pub_;
@@ -155,6 +157,9 @@ namespace diff_drive_controller{
 
     /// Preserve turning radius if limiting speed:
     bool preserve_turning_radius_;
+
+    /// Publish limited velocity:
+    bool publish_cmd_;
 
   private:
     /**
