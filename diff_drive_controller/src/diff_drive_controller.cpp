@@ -515,13 +515,13 @@ namespace diff_drive_controller{
       ROS_ASSERT(pose_cov_list[i].getType() == XmlRpc::XmlRpcValue::TypeDouble);
 
     XmlRpc::XmlRpcValue kr, kl;
-    if (controller_nh.getParam("error_constante_left", kl))
+    if (controller_nh.getParam("error_constant_left", kl))
     {
       ROS_ASSERT(kl.getType() == XmlRpc::XmlRpcValue::TypeDouble);
       odometry_.setErrorCstLeft(kl);
     }
 
-    if (controller_nh.getParam("error_constante_right", kr))
+    if (controller_nh.getParam("error_constant_right", kr))
     {
       ROS_ASSERT(kr.getType() == XmlRpc::XmlRpcValue::TypeDouble);
       odometry_.setErrorCstLeft(kr);
