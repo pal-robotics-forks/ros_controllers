@@ -524,7 +524,7 @@ namespace diff_drive_controller{
     if (controller_nh.getParam("error_constant_right", kr))
     {
       ROS_ASSERT(kr.getType() == XmlRpc::XmlRpcValue::TypeDouble);
-      odometry_.setErrorCstLeft(kr);
+      odometry_.setErrorCstRight(kr);
     }
 
     XmlRpc::XmlRpcValue twist_cov_list;
