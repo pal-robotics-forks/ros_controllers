@@ -41,6 +41,8 @@
 
 #include <diff_drive_controller/odometry.h>
 
+#include <math.h>
+
 #include <boost/bind.hpp>
 
 namespace diff_drive_controller
@@ -51,6 +53,8 @@ namespace diff_drive_controller
   : timestamp_(0.0)
   , x_(0.0)
   , y_(0.0)
+  , kr_(0.001)
+  , kl_(0.001)
   , heading_(0.0)
   , linear_(0.0)
   , angular_(0.0)
@@ -63,6 +67,7 @@ namespace diff_drive_controller
   , angular_acc_(RollingWindow::window_size = velocity_rolling_window_size)
   , integrate_fun_(boost::bind(&Odometry::integrateExact, this, _1, _2))
   {
+    memset(pose_cov_, 0, 9);
   }
 
   void Odometry::init(const ros::Time& time)
@@ -97,6 +102,50 @@ namespace diff_drive_controller
     const double dt = (time - timestamp_).toSec();
     if (dt < 0.0001)
       return false; // Interval too small to integrate with
+
+    /// Update motion increment cov
+    const double drr = std::abs(right_wheel_est_vel) * kr_;
+    const double dll = std::abs(left_wheel_est_vel) * kr_;
+
+    const double sha = sin(heading_ + angular/2);
+    const double cha = cos(heading_ + angular/2);
+
+    /// Jacobian position
+    const double jp_2 = -linear * sha;
+    const double jp_5 =  linear * cha;
+
+    /// Jacobian motion
+    const double jrl_0 = 0.5 * cha - (linear / (2*wheel_separation_)) * sha;
+    const double jrl_1 = 0.5 * cha + (linear / (2*wheel_separation_)) * sha;
+    const double jrl_2 = 0.5 * sha + (linear / (2*wheel_separation_)) * cha;
+    const double jrl_3 = 0.5 * sha - (linear / (2*wheel_separation_)) * cha;
+    const double jrl_4 = 1 / wheel_separation_;
+    const double jrl_5 = 1 / wheel_separation_;
+
+    /// Update position covariance
+    //xx
+    pose_cov_[0] += jp_2*(pose_cov_[6] + pose_cov_[8]*jp_2) + pose_cov_[2]*jp_2
+                    + dll*jrl_1*jrl_1 + drr*jrl_0*jrl_0;
+    //xy
+    pose_cov_[1] += pose_cov_[2]*jp_5 + dll*jrl_1*jrl_3 + drr*jrl_0*jrl_2
+                    +jp_2*(pose_cov_[5] + pose_cov_[8]*jp_5);
+    //xth
+    pose_cov_[2] += pose_cov_[8]*jp_2 + dll*jrl_1*jrl_5 + drr*jrl_0*jrl_4;
+
+    //yx
+    pose_cov_[3] = pose_cov_[1];
+    //yy
+    pose_cov_[4] += jp_5*(pose_cov_[5]+pose_cov_[8]*jp_5) + pose_cov_[5]*jp_5
+                    + dll*jrl_3*jrl_3 + drr*jrl_2*jrl_2;
+    //yth
+    pose_cov_[5] += pose_cov_[8]*jp_5 + dll*jrl_3*jrl_5 + drr*jrl_2*jrl_4;
+
+    //thx
+    pose_cov_[6] = pose_cov_[2];
+    //thy
+    pose_cov_[7] = pose_cov_[5];
+    //thth
+    pose_cov_[8] += dll*jrl_5*jrl_5 + drr*jrl_4*jrl_4;
 
     timestamp_ = time;
 

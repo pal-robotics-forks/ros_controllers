@@ -140,6 +140,37 @@ namespace diff_drive_controller
     }
 
     /**
+     * \brief pose covariance entry getter
+     * \return pose covariance entry ind
+     * \return -1 if ind out of bounds
+     */
+    double getPoseCov(int ind) const
+    {
+      return (ind >= 0 && ind <= 8)? pose_cov_[ind] : -1;
+    }
+
+    /**
+     * \brief Sets pose covariance entry if ind valid
+     * \param ind covariance matrix entry index
+     * \param val value of the entry
+     */
+    void setPoseCov(int ind, double val)
+    {
+      if (ind >= 0 && ind <= 8)
+        pose_cov_[ind] = val;
+    }
+
+    void setErrorCstRight(double val)
+    {
+      kr_ = val;
+    }
+
+    void setErrorCstLeft(double val)
+    {
+      kl_ = val;
+    }
+
+    /**
      * \brief Sets the wheel parameters: radius and separation
      * \param wheel_separation Seperation between left and right wheels [m]
      * \param wheel_radius     Wheel radius [m]
@@ -184,6 +215,14 @@ namespace diff_drive_controller
     double x_;        //   [m]
     double y_;        //   [m]
     double heading_;  // [rad]
+
+    // Error constants - nondeterministic param
+    // of motor drive and wheel-floor interaction
+    double kr_;
+    double kl_;
+
+    // Position covariance [x,y,th]
+    double pose_cov_[9];
 
     /// Current velocity:
     double linear_;  //   [m/s]
