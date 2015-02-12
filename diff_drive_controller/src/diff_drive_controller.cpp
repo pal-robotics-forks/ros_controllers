@@ -514,12 +514,18 @@ namespace diff_drive_controller{
     for (int i = 0; i < pose_cov_list.size(); ++i)
       ROS_ASSERT(pose_cov_list[i].getType() == XmlRpc::XmlRpcValue::TypeDouble);
 
-    double kr, kl;
+    XmlRpc::XmlRpcValue kr, kl;
     if (controller_nh.getParam("error_constante_left", kl))
+    {
+      ROS_ASSERT(kl.getType() == XmlRpc::XmlRpcValue::TypeDouble);
       odometry_.setErrorCstLeft(kl);
+    }
 
     if (controller_nh.getParam("error_constante_right", kr))
+    {
+      ROS_ASSERT(kr.getType() == XmlRpc::XmlRpcValue::TypeDouble);
       odometry_.setErrorCstLeft(kr);
+    }
 
     XmlRpc::XmlRpcValue twist_cov_list;
     controller_nh.getParam("twist_covariance_diagonal", twist_cov_list);
