@@ -236,15 +236,16 @@ namespace diff_drive_controller
     /// Enable Covariance matrix update
     bool update_pos_cov_;
 
-    // Error constants - nondeterministic param
-    // of motor drive and wheel-floor interaction
+    /// Error constants of motor drive
+    /// and wheel-floor interaction
     double kr_;
     double kl_;
 
-    // Position covariance
-    // |  xx  xy  xth |
-    // |  yx  yy  yth |
-    // | thx thy thth |
+    /** Position covariance
+    *   |  xx  xy  xth |
+    *   |  yx  yy  yth |
+    *   | thx thy thth |
+    */
     double pose_cov_[9];
 
     /// Current velocity:
