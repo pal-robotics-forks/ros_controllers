@@ -229,7 +229,10 @@ namespace diff_drive_controller
     double kr_;
     double kl_;
 
-    // Position covariance [x,y,th]
+    // Position covariance
+    // |  xx  xy  xth |
+    // |  yx  yy  yth |
+    // | thx thy thth |
     double pose_cov_[9];
 
     /// Current velocity:
