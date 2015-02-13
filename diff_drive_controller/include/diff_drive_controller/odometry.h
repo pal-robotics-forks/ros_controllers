@@ -150,6 +150,15 @@ namespace diff_drive_controller
     }
 
     /**
+     * \brief Enable/disable pose covariance matrix update
+     * \param enable true enable, false disable
+     */
+    void enablePoseCovUpdate(bool enable)
+    {
+      update_pos_cov_ = enable;
+    }
+
+    /**
      * \brief Sets pose covariance entry if ind valid
      * \param ind covariance matrix entry index
      * \param val value of the entry
@@ -223,6 +232,9 @@ namespace diff_drive_controller
     double x_;        //   [m]
     double y_;        //   [m]
     double heading_;  // [rad]
+
+    /// Enable Covariance matrix update
+    bool update_pos_cov_;
 
     // Error constants - nondeterministic param
     // of motor drive and wheel-floor interaction

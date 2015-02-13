@@ -514,6 +514,13 @@ namespace diff_drive_controller{
     for (int i = 0; i < pose_cov_list.size(); ++i)
       ROS_ASSERT(pose_cov_list[i].getType() == XmlRpc::XmlRpcValue::TypeDouble);
 
+    XmlRpc::XmlRpcValue enable_pose_cov;
+    if (controller_nh.getParam("enable_pose_covariance_update", enable_pose_cov))
+    {
+      ROS_ASSERT(enable_pose_cov.getType() == XmlRpc::XmlRpcValue::TypeBoolean);
+      odometry_.enablePoseCovUpdate(enable_pose_cov);
+    }
+
     XmlRpc::XmlRpcValue kr, kl;
     if (controller_nh.getParam("error_constant_left", kl))
     {
