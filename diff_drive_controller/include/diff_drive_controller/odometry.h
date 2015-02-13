@@ -236,8 +236,9 @@ namespace diff_drive_controller
     /// Enable Covariance matrix update
     bool update_pos_cov_;
 
-    /// Error constants of motor drive
-    /// and wheel-floor interaction
+    /// Error constants kr and kl depend on the robot
+    /// and the environment and should be experimentally
+    /// established by performing and analyzing representative movements
     double kr_;
     double kl_;
 
