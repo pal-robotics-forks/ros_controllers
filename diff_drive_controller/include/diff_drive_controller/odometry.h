@@ -141,7 +141,7 @@ namespace diff_drive_controller
 
     /**
      * \brief pose covariance entry getter
-     * \return pose covariance entry ind
+     * \return pose covariance entry index
      * \return -1 if ind out of bounds
      */
     double getPoseCov(int ind) const
