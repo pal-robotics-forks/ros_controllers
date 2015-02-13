@@ -160,11 +160,19 @@ namespace diff_drive_controller
         pose_cov_[ind] = val;
     }
 
+    /**
+     * \brief Sets error constant of the right wheel
+     * \param val value of the error constant
+     */
     void setErrorCstRight(double val)
     {
       kr_ = val;
     }
 
+    /**
+     * \brief Sets error constant of the left wheel
+     * \param val value of the error constant
+     */
     void setErrorCstLeft(double val)
     {
       kl_ = val;
