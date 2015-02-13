@@ -55,6 +55,7 @@ namespace diff_drive_controller
   , y_(0.0)
   , kr_(0.001)
   , kl_(0.001)
+  , pose_cov_() //this init the whole array to 0
   , heading_(0.0)
   , linear_(0.0)
   , angular_(0.0)
@@ -67,7 +68,6 @@ namespace diff_drive_controller
   , angular_acc_(RollingWindow::window_size = velocity_rolling_window_size)
   , integrate_fun_(boost::bind(&Odometry::integrateExact, this, _1, _2))
   {
-    memset(pose_cov_, 0, 9);
   }
 
   void Odometry::init(const ros::Time& time)
