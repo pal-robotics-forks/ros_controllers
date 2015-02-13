@@ -41,7 +41,7 @@
 
 #include <diff_drive_controller/odometry.h>
 
-#include <math.h>
+#include <cmath>
 
 #include <boost/bind.hpp>
 
