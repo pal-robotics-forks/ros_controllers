@@ -56,7 +56,7 @@ namespace diff_drive_controller
   , kr_(0.001)
   , kl_(0.001)
   , pose_cov_() //this init the whole array to 0
-  , update_pos_cov_(false)
+  , update_pose_cov_(false)
   , heading_(0.0)
   , linear_(0.0)
   , angular_(0.0)
@@ -67,7 +67,7 @@ namespace diff_drive_controller
   , velocity_rolling_window_size_(velocity_rolling_window_size)
   , linear_acc_(RollingWindow::window_size = velocity_rolling_window_size)
   , angular_acc_(RollingWindow::window_size = velocity_rolling_window_size)
-  , integrate_fun_(boost::bind(&Odometry::integrateExact, this, _1, _2))
+  , integrate_fun_(boost::bind(&Odometry::integrateExact, this, _1, _2, _3, _4))
   {
   }
 
@@ -96,60 +96,13 @@ namespace diff_drive_controller
     const double linear  = (right_wheel_est_vel + left_wheel_est_vel) * 0.5 ;
     const double angular = (right_wheel_est_vel - left_wheel_est_vel) / wheel_separation_;
 
-    /// Integrate odometry:
-    integrate_fun_(linear, angular);
+    /// Update odometry state:
+    updateState(linear, angular, right_wheel_est_vel, left_wheel_est_vel);
 
     /// We cannot estimate the speed with very small time intervals:
     const double dt = (time - timestamp_).toSec();
     if (dt < 0.0001)
       return false; // Interval too small to integrate with
-
-    if (update_pos_cov_)
-    {
-      /// Update motion increment cov
-      const double drr = std::abs(right_wheel_est_vel) * kr_;
-      const double dll = std::abs(left_wheel_est_vel) * kr_;
-
-      const double sha = sin(heading_ + angular/2);
-      const double cha = cos(heading_ + angular/2);
-
-      /// Jacobian position
-      const double jp_2 = -linear * sha;
-      const double jp_5 =  linear * cha;
-
-      /// Jacobian motion
-      const double jrl_0 = 0.5 * cha - (linear / (2*wheel_separation_)) * sha;
-      const double jrl_1 = 0.5 * cha + (linear / (2*wheel_separation_)) * sha;
-      const double jrl_2 = 0.5 * sha + (linear / (2*wheel_separation_)) * cha;
-      const double jrl_3 = 0.5 * sha - (linear / (2*wheel_separation_)) * cha;
-      const double jrl_4 = 1 / wheel_separation_;
-      const double jrl_5 = 1 / wheel_separation_;
-
-      /// Update position covariance
-      //xx
-      pose_cov_[0] += jp_2*(pose_cov_[6] + pose_cov_[8]*jp_2) + pose_cov_[2]*jp_2
-          + dll*jrl_1*jrl_1 + drr*jrl_0*jrl_0;
-      //xy
-      pose_cov_[1] += pose_cov_[2]*jp_5 + dll*jrl_1*jrl_3 + drr*jrl_0*jrl_2
-          +jp_2*(pose_cov_[5] + pose_cov_[8]*jp_5);
-      //xth
-      pose_cov_[2] += pose_cov_[8]*jp_2 + dll*jrl_1*jrl_5 + drr*jrl_0*jrl_4;
-
-      //yx
-      pose_cov_[3] = pose_cov_[1];
-      //yy
-      pose_cov_[4] += jp_5*(pose_cov_[5]+pose_cov_[8]*jp_5) + pose_cov_[5]*jp_5
-          + dll*jrl_3*jrl_3 + drr*jrl_2*jrl_2;
-      //yth
-      pose_cov_[5] += pose_cov_[8]*jp_5 + dll*jrl_3*jrl_5 + drr*jrl_2*jrl_4;
-
-      //thx
-      pose_cov_[6] = pose_cov_[2];
-      //thy
-      pose_cov_[7] = pose_cov_[5];
-      //thth
-      pose_cov_[8] += dll*jrl_5*jrl_5 + drr*jrl_4*jrl_4;
-    }
 
     timestamp_ = time;
 
@@ -169,10 +122,35 @@ namespace diff_drive_controller
     linear_ = linear;
     angular_ = angular;
 
-    /// Integrate odometry:
+    /// Update odometry state:
+    const double vr = (linear - angular * wheel_separation_ / 2.0) / wheel_radius_;
+    const double vl = (linear + angular * wheel_separation_ / 2.0) / wheel_radius_;
     const double dt = (time - timestamp_).toSec();
     timestamp_ = time;
-    integrate_fun_(linear * dt, angular * dt);
+    updateState(linear * dt, angular * dt, vr, vl);
+  }
+
+  void Odometry::updateState(double linear, double angular, double vr, double vl)
+  {
+    if (update_pose_cov_)
+    {
+      /// Integrate odometry state and compute jacobian:
+      StateJacobian jacobian_state;
+      MotionJacobian jacobian_motion;
+      integrate_fun_(linear, angular, &jacobian_state, &jacobian_motion);
+
+      /// Update motion increment covariance:
+      Eigen::Matrix2d S; S << kr_ * abs(vr), 0.0,
+                                        0.0, kl_ * abs(vl);
+
+      pose_cov_ = jacobian_state  * pose_cov_ * jacobian_state.transpose() +
+                  jacobian_motion *     S     * jacobian_motion.transpose();
+    }
+    else
+    {
+      /// Integrate odometry state:
+      integrate_fun_(linear, angular, NULL, NULL);
+    }
   }
 
   void Odometry::setWheelParams(double wheel_separation, double wheel_radius)
@@ -188,33 +166,93 @@ namespace diff_drive_controller
     resetAccumulators();
   }
 
-  void Odometry::integrateRungeKutta2(double linear, double angular)
+  void Odometry::integrateRungeKutta2(double linear, double angular, StateJacobian* jacobian_state, MotionJacobian* jacobian_motion)
   {
     const double direction = heading_ + angular * 0.5;
 
+    const double cos_direction = cos(direction);
+    const double sin_direction = sin(direction);
+
     /// Runge-Kutta 2nd order integration:
-    x_       += linear * cos(direction);
-    y_       += linear * sin(direction);
+    x_       += linear * cos_direction;
+    y_       += linear * sin_direction;
     heading_ += angular;
+
+    /// Jacobians:
+    if (jacobian_state)
+    {
+      *jacobian_state << 1.0, 0.0, -linear * sin_direction,
+                         0.0, 1.0,  linear * cos_direction,
+                         0.0, 0.0, 1.0;
+    }
+
+    if (jacobian_motion)
+    {
+      const double b_inv = 1.0 / wheel_separation_;
+
+      const double linear_b_inv = linear * b_inv;
+
+      const double linear_b_inv_sin = linear_b_inv * sin_direction;
+      const double linear_b_inv_cos = linear_b_inv * cos_direction;
+
+      *jacobian_motion << 0.5 * (cos_direction - linear_b_inv_sin), 0.5 * (cos_direction + linear_b_inv_sin),
+                          0.5 * (sin_direction + linear_b_inv_cos), 0.5 * (sin_direction - linear_b_inv_cos),
+                                                             b_inv, -b_inv;
+    }
   }
 
-  /**
-   * \brief Other possible integration method provided by the class
-   * \param linear
-   * \param angular
-   */
-  void Odometry::integrateExact(double linear, double angular)
+  void Odometry::integrateExact(double linear, double angular, StateJacobian* jacobian_state, MotionJacobian* jacobian_motion)
   {
     if (fabs(angular) < 10e-3)
-      integrateRungeKutta2(linear, angular);
+    {
+      integrateRungeKutta2(linear, angular, jacobian_state, jacobian_motion);
+    }
     else
     {
       /// Exact integration (should solve problems when angular is zero):
       const double heading_old = heading_;
       const double r = linear/angular;
+
       heading_ += angular;
-      x_       +=  r * (sin(heading_) - sin(heading_old));
-      y_       += -r * (cos(heading_) - cos(heading_old));
+
+      const double sin_heading     = sin(heading_);
+      const double cos_heading     = cos(heading_);
+      const double sin_heading_old = sin(heading_old);
+      const double cos_heading_old = cos(heading_old);
+
+      const double s_heading = sin_heading - sin_heading_old;
+      const double c_heading = cos_heading - cos_heading_old;
+
+      x_       +=  r * s_heading;
+      y_       += -r * c_heading;
+
+      // Jacobians:
+      if (jacobian_state)
+      {
+        *jacobian_state << 1.0, 0.0, -r * c_heading,
+                           0.0, 1.0,  r * s_heading,
+                           0.0, 0.0, 1.0;
+      }
+
+      if (jacobian_motion)
+      {
+        const double b_inv = 1.0 / wheel_separation_;
+
+        const double linear_b_inv = linear * b_inv;
+        const double r_b_inv      = r * b_inv;
+
+        const double angular_2_inv = 1.0 / (angular * angular);
+
+        const double dr_vl = (0.5 * angular + linear_b_inv) * angular_2_inv;
+        const double dr_vr = (0.5 * angular - linear_b_inv) * angular_2_inv;
+
+        const double r_b_inv_cos = r_b_inv * cos_heading;
+        const double r_b_inv_sin = r_b_inv * sin_heading;
+
+        *jacobian_motion <<  dr_vr * s_heading + r_b_inv_cos,  dr_vl * s_heading - r_b_inv_cos,
+                            -dr_vr * c_heading + r_b_inv_sin, -dr_vl * c_heading - r_b_inv_sin,
+                                                       b_inv, -b_inv;
+      }
     }
   }
 

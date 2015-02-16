@@ -47,6 +47,7 @@
 #include <boost/accumulators/statistics/stats.hpp>
 #include <boost/accumulators/statistics/rolling_mean.hpp>
 #include <boost/function.hpp>
+#include <Eigen/Core>
 
 namespace diff_drive_controller
 {
@@ -60,8 +61,15 @@ namespace diff_drive_controller
   {
   public:
 
+    /// Jacobian types:
+    typedef Eigen::Matrix3d             StateJacobian;
+    typedef Eigen::Matrix<double, 3, 2> MotionJacobian;
+
+    /// Covariance type:
+    typedef StateJacobian Covariance;
+
     /// Integration function, used to integrate the odometry:
-    typedef boost::function<void(double, double)> IntegrationFunction;
+    typedef boost::function<void(double, double, StateJacobian*, MotionJacobian*)> IntegrationFunction;
 
     /**
      * \brief Constructor
@@ -93,6 +101,15 @@ namespace diff_drive_controller
      * \param time    Current time
      */
     void updateOpenLoop(double linear, double angular, const ros::Time &time);
+
+    /**
+     * \brief Updates the odometry state
+     * \param linear  Linear velocity [m/s]
+     * \param angular Angular velocity [rad/s]
+     * \param vr Right wheel speed (increment)
+     * \param vl Left wheel speed (increment)
+     */
+    void updateState(double linear, double angular, double vr, double vl);
 
     /**
      * \brief heading getter
@@ -141,12 +158,20 @@ namespace diff_drive_controller
 
     /**
      * \brief pose covariance entry getter
-     * \return pose covariance entry index
-     * \return -1 if ind out of bounds
+     * \return pose covariance
      */
-    double getPoseCov(int ind) const
+    Covariance getPoseCovariance() const
     {
-      return (ind >= 0 && ind <= 8)? pose_cov_[ind] : -1;
+      return pose_cov_;
+    }
+
+    /**
+     * \brief Sets pose covariance entry
+     * \param cov covariance
+     */
+    void setPoseCovariance(const Covariance& cov)
+    {
+      pose_cov_ = cov;
     }
 
     /**
@@ -155,18 +180,7 @@ namespace diff_drive_controller
      */
     void enablePoseCovUpdate(bool enable)
     {
-      update_pos_cov_ = enable;
-    }
-
-    /**
-     * \brief Sets pose covariance entry if ind valid
-     * \param ind covariance matrix entry index
-     * \param val value of the entry
-     */
-    void setPoseCov(int ind, double val)
-    {
-      if (ind >= 0 && ind <= 8)
-        pose_cov_[ind] = val;
+      update_pose_cov_ = enable;
     }
 
     /**
@@ -210,15 +224,19 @@ namespace diff_drive_controller
      * \brief Integrates the velocities (linear and angular) using 2nd order Runge-Kutta
      * \param linear  Linear  velocity   [m] (linear  displacement, i.e. m/s * dt) computed by encoders
      * \param angular Angular velocity [rad] (angular displacement, i.e. m/s * dt) computed by encoders
+     * \param jacobian_state  Jacobian wrt state [x, y, theta]
+     * \param jacobian_motion Jacobian wrt wheel traveled distances (motion) [v_r, v_l]
      */
-    void integrateRungeKutta2(double linear, double angular);
+    void integrateRungeKutta2(double linear, double angular, StateJacobian* jacobian_state, MotionJacobian* jacobian_motion);
 
     /**
      * \brief Integrates the velocities (linear and angular) using exact method
      * \param linear  Linear  velocity   [m] (linear  displacement, i.e. m/s * dt) computed by encoders
      * \param angular Angular velocity [rad] (angular displacement, i.e. m/s * dt) computed by encoders
+     * \param jacobian_state  Jacobian wrt state [x, y, theta]
+     * \param jacobian_motion Jacobian wrt wheel traveled distances (motion) [v_r, v_l]
      */
-    void integrateExact(double linear, double angular);
+    void integrateExact(double linear, double angular, StateJacobian* jacobian_state, MotionJacobian* jacobian_motion);
 
     /**
      *  \brief Reset linear and angular accumulators
@@ -233,9 +251,6 @@ namespace diff_drive_controller
     double y_;        //   [m]
     double heading_;  // [rad]
 
-    /// Enable Covariance matrix update
-    bool update_pos_cov_;
-
     /// Error constants kr and kl depend on the robot
     /// and the environment and should be experimentally
     /// established by performing and analyzing representative movements
@@ -247,7 +262,10 @@ namespace diff_drive_controller
     *   |  yx  yy  yth |
     *   | thx thy thth |
     */
-    double pose_cov_[9];
+    Covariance pose_cov_;
+
+    /// Enable Covariance matrix update
+    bool update_pose_cov_;
 
     /// Current velocity:
     double linear_;  //   [m/s]

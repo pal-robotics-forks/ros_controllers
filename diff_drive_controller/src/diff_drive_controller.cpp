@@ -279,15 +279,16 @@ namespace diff_drive_controller{
         odom_pub_->msg_.pose.pose.position.x = odometry_.getX();
         odom_pub_->msg_.pose.pose.position.y = odometry_.getY();
         odom_pub_->msg_.pose.pose.orientation = orientation;
-        odom_pub_->msg_.pose.covariance.at(0) = odometry_.getPoseCov(0);  //xx
-        odom_pub_->msg_.pose.covariance.at(1) = odometry_.getPoseCov(1);  //xy
-        odom_pub_->msg_.pose.covariance.at(5) = odometry_.getPoseCov(2);  //xth
-        odom_pub_->msg_.pose.covariance.at(6) = odometry_.getPoseCov(3);  //yx
-        odom_pub_->msg_.pose.covariance.at(7) = odometry_.getPoseCov(4);  //yy
-        odom_pub_->msg_.pose.covariance.at(11) = odometry_.getPoseCov(5); //yth
-        odom_pub_->msg_.pose.covariance.at(33) = odometry_.getPoseCov(6); //thx
-        odom_pub_->msg_.pose.covariance.at(34) = odometry_.getPoseCov(7); //thy
-        odom_pub_->msg_.pose.covariance.at(35) = odometry_.getPoseCov(8); //thth
+        Odometry::Covariance cov = odometry_.getPoseCovariance();
+        odom_pub_->msg_.pose.covariance[ 0] = cov(0, 0);
+        odom_pub_->msg_.pose.covariance[ 1] = cov(0, 1);
+        odom_pub_->msg_.pose.covariance[ 5] = cov(0, 2);
+        odom_pub_->msg_.pose.covariance[ 6] = cov(1, 0);
+        odom_pub_->msg_.pose.covariance[ 7] = cov(1, 1);
+        odom_pub_->msg_.pose.covariance[11] = cov(1, 2);
+        odom_pub_->msg_.pose.covariance[33] = cov(2, 0);
+        odom_pub_->msg_.pose.covariance[34] = cov(2, 1);
+        odom_pub_->msg_.pose.covariance[35] = cov(2, 2);
         odom_pub_->msg_.twist.twist.linear.x  = odometry_.getLinear();
         odom_pub_->msg_.twist.twist.angular.z = odometry_.getAngular();
         odom_pub_->unlockAndPublish();
@@ -575,15 +576,17 @@ namespace diff_drive_controller{
   {
     if (odom_pub_->trylock())
     {
-      odometry_.setPoseCov(0, odom_pub_->msg_.pose.covariance.at(0));
-      odometry_.setPoseCov(1, odom_pub_->msg_.pose.covariance.at(1));
-      odometry_.setPoseCov(2, odom_pub_->msg_.pose.covariance.at(5));
-      odometry_.setPoseCov(3, odom_pub_->msg_.pose.covariance.at(6));
-      odometry_.setPoseCov(4, odom_pub_->msg_.pose.covariance.at(7));
-      odometry_.setPoseCov(5, odom_pub_->msg_.pose.covariance.at(11));
-      odometry_.setPoseCov(6, odom_pub_->msg_.pose.covariance.at(33));
-      odometry_.setPoseCov(7, odom_pub_->msg_.pose.covariance.at(34));
-      odometry_.setPoseCov(8, odom_pub_->msg_.pose.covariance.at(35));
+      Odometry::Covariance cov;
+      cov << odom_pub_->msg_.pose.covariance[ 0],
+             odom_pub_->msg_.pose.covariance[ 1],
+             odom_pub_->msg_.pose.covariance[ 5],
+             odom_pub_->msg_.pose.covariance[ 6],
+             odom_pub_->msg_.pose.covariance[ 7],
+             odom_pub_->msg_.pose.covariance[11],
+             odom_pub_->msg_.pose.covariance[33],
+             odom_pub_->msg_.pose.covariance[34],
+             odom_pub_->msg_.pose.covariance[35];
+      odometry_.setPoseCovariance(cov);
       odom_pub_->unlock();
       return true;
     }

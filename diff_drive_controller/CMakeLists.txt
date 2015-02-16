@@ -7,13 +7,17 @@ find_package(catkin REQUIRED COMPONENTS
     tf
     nav_msgs)
 
+  find_package(Eigen REQUIRED)
+
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
 )
 
 include_directories(
-  include ${catkin_INCLUDE_DIRS}
+  include
+  ${catkin_INCLUDE_DIRS}
+  ${EIGEN_INCLUDE_DIRS}
 )
 
 add_library(${PROJECT_NAME} src/diff_drive_controller.cpp src/odometry.cpp src/speed_limiter.cpp)
