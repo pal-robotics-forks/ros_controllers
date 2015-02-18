@@ -219,6 +219,12 @@ namespace diff_drive_controller
      */
     void setOdomPubFields(ros::NodeHandle& root_nh, ros::NodeHandle& controller_nh);
 
+    /**
+     * \brief Sets the odometry covariance matrix
+     * \return true if odometry covariance correctly init
+     */
+    bool initOdomCov();
+
   };
 
   PLUGINLIB_EXPORT_CLASS(diff_drive_controller::DiffDriveController, controller_interface::ControllerBase);

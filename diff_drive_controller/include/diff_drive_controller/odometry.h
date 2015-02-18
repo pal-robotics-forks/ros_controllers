@@ -47,6 +47,7 @@
 #include <boost/accumulators/statistics/stats.hpp>
 #include <boost/accumulators/statistics/rolling_mean.hpp>
 #include <boost/function.hpp>
+#include <Eigen/Core>
 
 namespace diff_drive_controller
 {
@@ -60,8 +61,15 @@ namespace diff_drive_controller
   {
   public:
 
+    /// Jacobian types:
+    typedef Eigen::Matrix3d             StateJacobian;
+    typedef Eigen::Matrix<double, 3, 2> MotionJacobian;
+
+    /// Covariance type:
+    typedef StateJacobian Covariance;
+
     /// Integration function, used to integrate the odometry:
-    typedef boost::function<void(double, double)> IntegrationFunction;
+    typedef boost::function<void(double, double, StateJacobian*, MotionJacobian*)> IntegrationFunction;
 
     /**
      * \brief Constructor
@@ -95,6 +103,15 @@ namespace diff_drive_controller
      * \param time    Current time
      */
     void updateOpenLoop(double linear, double angular, const ros::Time &time);
+
+    /**
+     * \brief Updates the odometry state
+     * \param linear  Linear velocity [m/s]
+     * \param angular Angular velocity [rad/s]
+     * \param vr Right wheel speed (increment)
+     * \param vl Left wheel speed (increment)
+     */
+    void updateState(double linear, double angular, double vr, double vl);
 
     /**
      * \brief heading getter
@@ -142,6 +159,51 @@ namespace diff_drive_controller
     }
 
     /**
+     * \brief pose covariance entry getter
+     * \return pose covariance
+     */
+    Covariance getPoseCovariance() const
+    {
+      return pose_cov_;
+    }
+
+    /**
+     * \brief Sets pose covariance entry
+     * \param cov covariance
+     */
+    void setPoseCovariance(const Covariance& cov)
+    {
+      pose_cov_ = cov;
+    }
+
+    /**
+     * \brief Enable/disable pose covariance matrix update
+     * \param enable true enable, false disable
+     */
+    void enablePoseCovUpdate(bool enable)
+    {
+      update_pose_cov_ = enable;
+    }
+
+    /**
+     * \brief Sets error constant of the right wheel
+     * \param val value of the error constant
+     */
+    void setErrorCstRight(double val)
+    {
+      error_constant_right_ = val;
+    }
+
+    /**
+     * \brief Sets error constant of the left wheel
+     * \param val value of the error constant
+     */
+    void setErrorCstLeft(double val)
+    {
+      error_constant_left_ = val;
+    }
+
+    /**
      * \brief Sets the wheel parameters: radius and separation
      * \param wheel_separation Seperation between left and right wheels [m]
      * \param wheel_radius     Left wheel radius [m]
@@ -165,15 +227,19 @@ namespace diff_drive_controller
      * \brief Integrates the velocities (linear and angular) using 2nd order Runge-Kutta
      * \param linear  Linear  velocity   [m] (linear  displacement, i.e. m/s * dt) computed by encoders
      * \param angular Angular velocity [rad] (angular displacement, i.e. m/s * dt) computed by encoders
+     * \param jacobian_state  Jacobian wrt state [x, y, theta]
+     * \param jacobian_motion Jacobian wrt wheel traveled distances (motion) [v_r, v_l]
      */
-    void integrateRungeKutta2(double linear, double angular);
+    void integrateRungeKutta2(double linear, double angular, StateJacobian* jacobian_state, MotionJacobian* jacobian_motion);
 
     /**
      * \brief Integrates the velocities (linear and angular) using exact method
      * \param linear  Linear  velocity   [m] (linear  displacement, i.e. m/s * dt) computed by encoders
      * \param angular Angular velocity [rad] (angular displacement, i.e. m/s * dt) computed by encoders
+     * \param jacobian_state  Jacobian wrt state [x, y, theta]
+     * \param jacobian_motion Jacobian wrt wheel traveled distances (motion) [v_r, v_l]
      */
-    void integrateExact(double linear, double angular);
+    void integrateExact(double linear, double angular, StateJacobian* jacobian_state, MotionJacobian* jacobian_motion);
 
     /**
      *  \brief Reset linear and angular accumulators
@@ -187,6 +253,22 @@ namespace diff_drive_controller
     double x_;        //   [m]
     double y_;        //   [m]
     double heading_;  // [rad]
+
+    /// Error constants kr and kl depend on the robot
+    /// and the environment and should be experimentally
+    /// established by performing and analyzing representative movements
+    double error_constant_right_;
+    double error_constant_left_;
+
+    /** Position covariance
+    *   |  xx  xy  xth |
+    *   |  yx  yy  yth |
+    *   | thx thy thth |
+    */
+    Covariance pose_cov_;
+
+    /// Enable Covariance matrix update
+    bool update_pose_cov_;
 
     /// Current velocity:
     double linear_;  //   [m/s]

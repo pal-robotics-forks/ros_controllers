@@ -244,7 +244,6 @@ namespace diff_drive_controller{
 
     setOdomPubFields(root_nh, controller_nh);
 
-
     cmd_vel_pub_.reset(new realtime_tools::RealtimePublisher<geometry_msgs::TwistStamped>(controller_nh, "cmd_vel_out", 100));
 
     // Wheel data:
@@ -267,6 +266,9 @@ namespace diff_drive_controller{
       wheel_data_pub_->msg_.left_wheel_joint_names[i]  = left_wheel_names[i];
       wheel_data_pub_->msg_.right_wheel_joint_names[i] = right_wheel_names[i];
     }
+
+    if (!initOdomCov())
+      ROS_ERROR_STREAM_NAMED(name_, "Odometry covariance could not be initialized correctly!\nSet to zero.");
 
     // Get the joint object to use in the realtime loop
     for (int i = 0; i < wheel_joints_size_; ++i)
@@ -323,6 +325,16 @@ namespace diff_drive_controller{
         odom_pub_->msg_.pose.pose.position.x = odometry_.getX();
         odom_pub_->msg_.pose.pose.position.y = odometry_.getY();
         odom_pub_->msg_.pose.pose.orientation = orientation;
+        Odometry::Covariance cov = odometry_.getPoseCovariance();
+        odom_pub_->msg_.pose.covariance[ 0] = cov(0, 0);
+        odom_pub_->msg_.pose.covariance[ 1] = cov(0, 1);
+        odom_pub_->msg_.pose.covariance[ 5] = cov(0, 2);
+        odom_pub_->msg_.pose.covariance[ 6] = cov(1, 0);
+        odom_pub_->msg_.pose.covariance[ 7] = cov(1, 1);
+        odom_pub_->msg_.pose.covariance[11] = cov(1, 2);
+        odom_pub_->msg_.pose.covariance[30] = cov(2, 0);
+        odom_pub_->msg_.pose.covariance[31] = cov(2, 1);
+        odom_pub_->msg_.pose.covariance[35] = cov(2, 2);
         odom_pub_->msg_.twist.twist.linear.x  = odometry_.getLinear();
         odom_pub_->msg_.twist.twist.angular.z = odometry_.getAngular();
         odom_pub_->unlockAndPublish();
@@ -606,6 +618,26 @@ namespace diff_drive_controller{
     for (int i = 0; i < pose_cov_list.size(); ++i)
       ROS_ASSERT(pose_cov_list[i].getType() == XmlRpc::XmlRpcValue::TypeDouble);
 
+    XmlRpc::XmlRpcValue enable_pose_cov;
+    if (controller_nh.getParam("enable_pose_covariance_update", enable_pose_cov))
+    {
+      ROS_ASSERT(enable_pose_cov.getType() == XmlRpc::XmlRpcValue::TypeBoolean);
+      odometry_.enablePoseCovUpdate(enable_pose_cov);
+    }
+
+    XmlRpc::XmlRpcValue error_constant_left, error_constant_right;
+    if (controller_nh.getParam("error_constant_left", error_constant_left))
+    {
+      ROS_ASSERT(error_constant_left.getType() == XmlRpc::XmlRpcValue::TypeDouble);
+      odometry_.setErrorCstLeft(error_constant_left);
+    }
+
+    if (controller_nh.getParam("error_constant_right", error_constant_right))
+    {
+      ROS_ASSERT(error_constant_right.getType() == XmlRpc::XmlRpcValue::TypeDouble);
+      odometry_.setErrorCstRight(error_constant_right);
+    }
+
     XmlRpc::XmlRpcValue twist_cov_list;
     controller_nh.getParam("twist_covariance_diagonal", twist_cov_list);
     ROS_ASSERT(twist_cov_list.getType() == XmlRpc::XmlRpcValue::TypeArray);
@@ -641,6 +673,27 @@ namespace diff_drive_controller{
     tf_odom_pub_->msg_.transforms[0].transform.translation.z = 0.0;
     tf_odom_pub_->msg_.transforms[0].child_frame_id = base_frame_id_;
     tf_odom_pub_->msg_.transforms[0].header.frame_id = "odom";
+  }
+
+  bool DiffDriveController::initOdomCov()
+  {
+    if (odom_pub_->trylock())
+    {
+      Odometry::Covariance cov;
+      cov << odom_pub_->msg_.pose.covariance[ 0],
+             odom_pub_->msg_.pose.covariance[ 1],
+             odom_pub_->msg_.pose.covariance[ 5],
+             odom_pub_->msg_.pose.covariance[ 6],
+             odom_pub_->msg_.pose.covariance[ 7],
+             odom_pub_->msg_.pose.covariance[11],
+             odom_pub_->msg_.pose.covariance[30],
+             odom_pub_->msg_.pose.covariance[31],
+             odom_pub_->msg_.pose.covariance[35];
+      odometry_.setPoseCovariance(cov);
+      odom_pub_->unlock();
+      return true;
+    }
+    return false;
   }
 
 } // namespace diff_drive_controller
