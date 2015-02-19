@@ -286,8 +286,8 @@ namespace diff_drive_controller{
         odom_pub_->msg_.pose.covariance[ 6] = cov(1, 0);
         odom_pub_->msg_.pose.covariance[ 7] = cov(1, 1);
         odom_pub_->msg_.pose.covariance[11] = cov(1, 2);
-        odom_pub_->msg_.pose.covariance[33] = cov(2, 0);
-        odom_pub_->msg_.pose.covariance[34] = cov(2, 1);
+        odom_pub_->msg_.pose.covariance[30] = cov(2, 0);
+        odom_pub_->msg_.pose.covariance[31] = cov(2, 1);
         odom_pub_->msg_.pose.covariance[35] = cov(2, 2);
         odom_pub_->msg_.twist.twist.linear.x  = odometry_.getLinear();
         odom_pub_->msg_.twist.twist.angular.z = odometry_.getAngular();
@@ -583,8 +583,8 @@ namespace diff_drive_controller{
              odom_pub_->msg_.pose.covariance[ 6],
              odom_pub_->msg_.pose.covariance[ 7],
              odom_pub_->msg_.pose.covariance[11],
-             odom_pub_->msg_.pose.covariance[33],
-             odom_pub_->msg_.pose.covariance[34],
+             odom_pub_->msg_.pose.covariance[30],
+             odom_pub_->msg_.pose.covariance[31],
              odom_pub_->msg_.pose.covariance[35];
       odometry_.setPoseCovariance(cov);
       odom_pub_->unlock();
