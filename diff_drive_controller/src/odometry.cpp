@@ -129,8 +129,8 @@ namespace diff_drive_controller
     angular_ = angular;
 
     /// Update odometry state:
-    const double vr = (linear - angular * wheel_separation_ / 2.0) / wheel_radius_;
-    const double vl = (linear + angular * wheel_separation_ / 2.0) / wheel_radius_;
+    const double vl = (linear - angular * wheel_separation_ / 2.0) / wheel_radius_;
+    const double vr = (linear + angular * wheel_separation_ / 2.0) / wheel_radius_;
     const double dt = (time - timestamp_).toSec();
     timestamp_ = time;
     updateState(linear * dt, angular * dt, vr, vl);
