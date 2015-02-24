@@ -57,7 +57,8 @@ namespace diff_drive_controller
   , error_constant_right_(0.001)
   , error_constant_left_(0.001)
   , pose_cov_() //this init the whole array to 0
-  , update_pose_cov_(false)
+  , twist_cov_() //this init the whole array to 0
+  , update_cov_(false)
   , heading_(0.0)
   , linear_(0.0)
   , angular_(0.0)
@@ -105,40 +106,35 @@ namespace diff_drive_controller
     const double linear  = (right_wheel_est_vel + left_wheel_est_vel) * 0.5 ;
     const double angular = (right_wheel_est_vel - left_wheel_est_vel) / wheel_separation_;
 
-    /// Update odometry state:
-    updateState(linear, angular, right_wheel_est_vel, left_wheel_est_vel);
+    /// Update odometry pose state:
+    updatePoseState(linear, angular, right_wheel_est_vel, left_wheel_est_vel);
 
-    /// Estimate speeds using a rolling mean to filter them out:
-    linear_acc_(linear/dt);
-    angular_acc_(angular/dt);
-
-    linear_ = bacc::rolling_mean(linear_acc_);
-    angular_ = bacc::rolling_mean(angular_acc_);
+    /// Update odometry twist state:
+    updateTwistState(linear, angular, right_wheel_est_vel, left_wheel_est_vel, dt);
 
     return true;
   }
 
   void Odometry::updateOpenLoop(double linear, double angular, const ros::Time &time)
   {
-    /// Save last linear and angular velocity:
-    linear_ = linear;
-    angular_ = angular;
-
-    /// Update odometry state:
+    /// Update odometry pose state:
     const double vl = (linear - angular * wheel_separation_ / 2.0) / wheel_radius_;
     const double vr = (linear + angular * wheel_separation_ / 2.0) / wheel_radius_;
     const double dt = (time - timestamp_).toSec();
     timestamp_ = time;
-    updateState(linear * dt, angular * dt, vr, vl);
+    updatePoseState(linear * dt, angular * dt, vr, vl);
+
+    /// Update odometry twist state:
+    updateTwistState(linear * dt, angular * dt, vr, vl, dt);
   }
 
-  void Odometry::updateState(double linear, double angular, double vr, double vl)
+  void Odometry::updatePoseState(double linear, double angular, double vr, double vl)
   {
-    if (update_pose_cov_)
+    if (update_cov_)
     {
       /// Integrate odometry state and compute jacobian:
-      StateJacobian jacobian_state;
-      MotionJacobian jacobian_motion;
+      PoseStateJacobian jacobian_state;
+      PoseMotionJacobian jacobian_motion;
       integrate_fun_(linear, angular, &jacobian_state, &jacobian_motion);
 
       /// Update motion increment covariance:
@@ -152,6 +148,36 @@ namespace diff_drive_controller
     {
       /// Integrate odometry state:
       integrate_fun_(linear, angular, NULL, NULL);
+    }
+  }
+
+  void Odometry::updateTwistState(double linear, double angular, double vr, double vl, double dt)
+  {
+    /// Estimate speeds using a rolling mean to filter them out:
+    linear_acc_(linear/dt);
+    angular_acc_(angular/dt);
+
+    linear_ = bacc::rolling_mean(linear_acc_);
+    angular_ = bacc::rolling_mean(angular_acc_);
+
+    if (update_cov_)
+    {
+      /// Integrate odometry state and compute jacobian:
+      const double  b_inv = 1.0 / wheel_separation_;
+      const double dt_inv = 1.0 / dt;
+
+      const double dt_inv_2 = 0.5 * dt_inv;
+      const double b_dt_inv = b_inv * dt_inv;
+
+      TwistMotionJacobian jacobian_motion;
+      jacobian_motion << dt_inv_2,  dt_inv_2,
+                         b_dt_inv, -b_dt_inv;
+
+      /// Update motion increment covariance:
+      Eigen::Matrix2d S; S << error_constant_right_ * std::abs(vr), 0.0,
+                              0.0, error_constant_left_ * std::abs(vl);
+
+      twist_cov_ = jacobian_motion * S * jacobian_motion.transpose();
     }
   }
 
@@ -169,7 +195,7 @@ namespace diff_drive_controller
     resetAccumulators();
   }
 
-  void Odometry::integrateRungeKutta2(double linear, double angular, StateJacobian* jacobian_state, MotionJacobian* jacobian_motion)
+  void Odometry::integrateRungeKutta2(double linear, double angular, PoseStateJacobian* jacobian_state, PoseMotionJacobian* jacobian_motion)
   {
     const double direction = heading_ + angular * 0.5;
 
@@ -204,7 +230,7 @@ namespace diff_drive_controller
     }
   }
 
-  void Odometry::integrateExact(double linear, double angular, StateJacobian* jacobian_state, MotionJacobian* jacobian_motion)
+  void Odometry::integrateExact(double linear, double angular, PoseStateJacobian* jacobian_state, PoseMotionJacobian* jacobian_motion)
   {
     if (fabs(angular) < 10e-3)
     {

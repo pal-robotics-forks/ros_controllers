@@ -62,14 +62,16 @@ namespace diff_drive_controller
   public:
 
     /// Jacobian types:
-    typedef Eigen::Matrix3d             StateJacobian;
-    typedef Eigen::Matrix<double, 3, 2> MotionJacobian;
+    typedef Eigen::Matrix3d             PoseStateJacobian;
+    typedef Eigen::Matrix<double, 3, 2> PoseMotionJacobian;
+    typedef Eigen::Matrix2d             TwistMotionJacobian;
 
     /// Covariance type:
-    typedef StateJacobian Covariance;
+    typedef PoseStateJacobian   PoseCovariance;
+    typedef TwistMotionJacobian TwistCovariance;
 
     /// Integration function, used to integrate the odometry:
-    typedef boost::function<void(double, double, StateJacobian*, MotionJacobian*)> IntegrationFunction;
+    typedef boost::function<void(double, double, PoseStateJacobian*, PoseMotionJacobian*)> IntegrationFunction;
 
     /**
      * \brief Constructor
@@ -103,13 +105,23 @@ namespace diff_drive_controller
     void updateOpenLoop(double linear, double angular, const ros::Time &time);
 
     /**
-     * \brief Updates the odometry state
+     * \brief Updates the odometry pose state
      * \param linear  Linear velocity [m/s]
      * \param angular Angular velocity [rad/s]
      * \param vr Right wheel speed (increment)
      * \param vl Left wheel speed (increment)
      */
-    void updateState(double linear, double angular, double vr, double vl);
+    void updatePoseState(double linear, double angular, double vr, double vl);
+
+    /**
+     * \brief Updates the odometry twist state
+     * \param linear  Linear velocity [m/s]
+     * \param angular Angular velocity [rad/s]
+     * \param vr Right wheel speed (increment)
+     * \param vl Left wheel speed (increment)
+     * \param dt Time increment [s]
+     */
+    void updateTwistState(double linear, double angular, double vr, double vl, double dt);
 
     /**
      * \brief heading getter
@@ -160,7 +172,7 @@ namespace diff_drive_controller
      * \brief pose covariance entry getter
      * \return pose covariance
      */
-    Covariance getPoseCovariance() const
+    PoseCovariance getPoseCovariance() const
     {
       return pose_cov_;
     }
@@ -169,18 +181,36 @@ namespace diff_drive_controller
      * \brief Sets pose covariance entry
      * \param cov covariance
      */
-    void setPoseCovariance(const Covariance& cov)
+    void setPoseCovariance(const PoseCovariance& cov)
     {
       pose_cov_ = cov;
     }
 
     /**
-     * \brief Enable/disable pose covariance matrix update
+     * \brief twist covariance entry getter
+     * \return twist covariance
+     */
+    TwistCovariance getTwistCovariance() const
+    {
+      return twist_cov_;
+    }
+
+    /**
+     * \brief Sets twist covariance entry
+     * \param cov covariance
+     */
+    void setTwistCovariance(const TwistCovariance& cov)
+    {
+      twist_cov_ = cov;
+    }
+
+    /**
+     * \brief Enable/disable covariance matrix update
      * \param enable true enable, false disable
      */
-    void enablePoseCovUpdate(bool enable)
+    void enableCovUpdate(bool enable)
     {
-      update_pose_cov_ = enable;
+      update_cov_ = enable;
     }
 
     /**
@@ -228,7 +258,7 @@ namespace diff_drive_controller
      * \param jacobian_state  Jacobian wrt state [x, y, theta]
      * \param jacobian_motion Jacobian wrt wheel traveled distances (motion) [v_r, v_l]
      */
-    void integrateRungeKutta2(double linear, double angular, StateJacobian* jacobian_state, MotionJacobian* jacobian_motion);
+    void integrateRungeKutta2(double linear, double angular, PoseStateJacobian* jacobian_state, PoseMotionJacobian* jacobian_motion);
 
     /**
      * \brief Integrates the velocities (linear and angular) using exact method
@@ -237,7 +267,7 @@ namespace diff_drive_controller
      * \param jacobian_state  Jacobian wrt state [x, y, theta]
      * \param jacobian_motion Jacobian wrt wheel traveled distances (motion) [v_r, v_l]
      */
-    void integrateExact(double linear, double angular, StateJacobian* jacobian_state, MotionJacobian* jacobian_motion);
+    void integrateExact(double linear, double angular, PoseStateJacobian* jacobian_state, PoseMotionJacobian* jacobian_motion);
 
     /**
      *  \brief Reset linear and angular accumulators
@@ -259,14 +289,20 @@ namespace diff_drive_controller
     double error_constant_left_;
 
     /** Position covariance
-    *   |  xx  xy  xth |
-    *   |  yx  yy  yth |
-    *   | thx thy thth |
-    */
-    Covariance pose_cov_;
+     *   |  xx  xy  xth |
+     *   |  yx  yy  yth |
+     *   | thx thy thth |
+     */
+    PoseCovariance pose_cov_;
+
+    /** Twist covariance
+     *   |  vv vw |
+     *   |  wv ww |
+     */
+    TwistCovariance twist_cov_;
 
     /// Enable Covariance matrix update
-    bool update_pose_cov_;
+    bool update_cov_;
 
     /// Current velocity:
     double linear_;  //   [m/s]

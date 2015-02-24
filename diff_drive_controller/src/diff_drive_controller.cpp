@@ -324,21 +324,30 @@ namespace diff_drive_controller{
       if (odom_pub_->trylock())
       {
         odom_pub_->msg_.header.stamp = time;
+
         odom_pub_->msg_.pose.pose.position.x = odometry_.getX();
         odom_pub_->msg_.pose.pose.position.y = odometry_.getY();
         odom_pub_->msg_.pose.pose.orientation = orientation;
-        Odometry::Covariance cov = odometry_.getPoseCovariance();
-        odom_pub_->msg_.pose.covariance[ 0] = cov(0, 0);
-        odom_pub_->msg_.pose.covariance[ 1] = cov(0, 1);
-        odom_pub_->msg_.pose.covariance[ 5] = cov(0, 2);
-        odom_pub_->msg_.pose.covariance[ 6] = cov(1, 0);
-        odom_pub_->msg_.pose.covariance[ 7] = cov(1, 1);
-        odom_pub_->msg_.pose.covariance[11] = cov(1, 2);
-        odom_pub_->msg_.pose.covariance[30] = cov(2, 0);
-        odom_pub_->msg_.pose.covariance[31] = cov(2, 1);
-        odom_pub_->msg_.pose.covariance[35] = cov(2, 2);
+
+        Odometry::PoseCovariance pose_cov = odometry_.getPoseCovariance();
+        odom_pub_->msg_.pose.covariance[ 0] = pose_cov(0, 0);
+        odom_pub_->msg_.pose.covariance[ 1] = pose_cov(0, 1);
+        odom_pub_->msg_.pose.covariance[ 5] = pose_cov(0, 2);
+        odom_pub_->msg_.pose.covariance[ 6] = pose_cov(1, 0);
+        odom_pub_->msg_.pose.covariance[ 7] = pose_cov(1, 1);
+        odom_pub_->msg_.pose.covariance[11] = pose_cov(1, 2);
+        odom_pub_->msg_.pose.covariance[30] = pose_cov(2, 0);
+        odom_pub_->msg_.pose.covariance[31] = pose_cov(2, 1);
+        odom_pub_->msg_.pose.covariance[35] = pose_cov(2, 2);
+
         odom_pub_->msg_.twist.twist.linear.x  = odometry_.getLinear();
         odom_pub_->msg_.twist.twist.angular.z = odometry_.getAngular();
+
+        Odometry::TwistCovariance twist_cov = odometry_.getTwistCovariance();
+        odom_pub_->msg_.twist.covariance[ 0] = twist_cov(0, 0);
+        odom_pub_->msg_.twist.covariance[ 5] = twist_cov(0, 1);
+        odom_pub_->msg_.twist.covariance[30] = twist_cov(1, 0);
+        odom_pub_->msg_.twist.covariance[35] = twist_cov(1, 1);
         odom_pub_->unlockAndPublish();
       }
 
@@ -600,11 +609,11 @@ namespace diff_drive_controller{
     for (int i = 0; i < pose_cov_list.size(); ++i)
       ROS_ASSERT(pose_cov_list[i].getType() == XmlRpc::XmlRpcValue::TypeDouble);
 
-    XmlRpc::XmlRpcValue enable_pose_cov;
-    if (controller_nh.getParam("enable_pose_covariance_update", enable_pose_cov))
+    XmlRpc::XmlRpcValue enable_cov;
+    if (controller_nh.getParam("enable_covariance_update", enable_cov))
     {
-      ROS_ASSERT(enable_pose_cov.getType() == XmlRpc::XmlRpcValue::TypeBoolean);
-      odometry_.enablePoseCovUpdate(enable_pose_cov);
+      ROS_ASSERT(enable_cov.getType() == XmlRpc::XmlRpcValue::TypeBoolean);
+      odometry_.enableCovUpdate(enable_cov);
     }
 
     XmlRpc::XmlRpcValue error_constant_left, error_constant_right;
@@ -661,17 +670,25 @@ namespace diff_drive_controller{
   {
     if (odom_pub_->trylock())
     {
-      Odometry::Covariance cov;
-      cov << odom_pub_->msg_.pose.covariance[ 0],
-             odom_pub_->msg_.pose.covariance[ 1],
-             odom_pub_->msg_.pose.covariance[ 5],
-             odom_pub_->msg_.pose.covariance[ 6],
-             odom_pub_->msg_.pose.covariance[ 7],
-             odom_pub_->msg_.pose.covariance[11],
-             odom_pub_->msg_.pose.covariance[30],
-             odom_pub_->msg_.pose.covariance[31],
-             odom_pub_->msg_.pose.covariance[35];
-      odometry_.setPoseCovariance(cov);
+      Odometry::PoseCovariance pose_cov;
+      pose_cov << odom_pub_->msg_.pose.covariance[ 0],
+                  odom_pub_->msg_.pose.covariance[ 1],
+                  odom_pub_->msg_.pose.covariance[ 5],
+                  odom_pub_->msg_.pose.covariance[ 6],
+                  odom_pub_->msg_.pose.covariance[ 7],
+                  odom_pub_->msg_.pose.covariance[11],
+                  odom_pub_->msg_.pose.covariance[30],
+                  odom_pub_->msg_.pose.covariance[31],
+                  odom_pub_->msg_.pose.covariance[35];
+      odometry_.setPoseCovariance(pose_cov);
+
+      Odometry::TwistCovariance twist_cov;
+      twist_cov << odom_pub_->msg_.twist.covariance[ 0],
+                   odom_pub_->msg_.twist.covariance[ 5],
+                   odom_pub_->msg_.twist.covariance[30],
+                   odom_pub_->msg_.twist.covariance[35];
+      odometry_.setTwistCovariance(twist_cov);
+
       odom_pub_->unlock();
       return true;
     }
