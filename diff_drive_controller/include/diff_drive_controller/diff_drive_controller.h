@@ -42,6 +42,7 @@
 
 #include <nav_msgs/Odometry.h>
 #include <geometry_msgs/TwistStamped.h>
+#include <diff_drive_controller/WheelData.h>
 #include <tf/tfMessage.h>
 
 #include <realtime_tools/realtime_buffer.h>
@@ -50,7 +51,8 @@
 #include <diff_drive_controller/odometry.h>
 #include <diff_drive_controller/speed_limiter.h>
 
-namespace diff_drive_controller{
+namespace diff_drive_controller
+{
 
   /**
    * This class makes some assumptions on the model of the robot:
@@ -127,6 +129,9 @@ namespace diff_drive_controller{
     boost::shared_ptr<realtime_tools::RealtimePublisher<tf::tfMessage> > tf_odom_pub_;
     Odometry odometry_;
 
+    /// Wheel data:
+    boost::shared_ptr<realtime_tools::RealtimePublisher<WheelData> > wheel_data_pub_;
+
     /// Wheel separation, wrt the midpoint of the wheel width:
     double wheel_separation_;
 
@@ -160,6 +165,9 @@ namespace diff_drive_controller{
 
     /// Publish limited velocity:
     bool publish_cmd_;
+
+    /// Publish wheel data:
+    bool publish_wheel_data_;
 
   private:
     /**
