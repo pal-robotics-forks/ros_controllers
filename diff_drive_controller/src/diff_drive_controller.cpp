@@ -340,14 +340,20 @@ namespace diff_drive_controller{
         odom_pub_->msg_.pose.covariance[31] = pose_cov(2, 1);
         odom_pub_->msg_.pose.covariance[35] = pose_cov(2, 2);
 
-        odom_pub_->msg_.twist.twist.linear.x  = odometry_.getLinear();
-        odom_pub_->msg_.twist.twist.angular.z = odometry_.getAngular();
+        odom_pub_->msg_.twist.twist.linear.x  = odometry_.getXDot();
+        odom_pub_->msg_.twist.twist.linear.y  = odometry_.getYDot();
+        odom_pub_->msg_.twist.twist.angular.z = odometry_.getYawDot();
 
         Odometry::TwistCovariance twist_cov = odometry_.getTwistCovariance();
         odom_pub_->msg_.twist.covariance[ 0] = twist_cov(0, 0);
-        odom_pub_->msg_.twist.covariance[ 5] = twist_cov(0, 1);
-        odom_pub_->msg_.twist.covariance[30] = twist_cov(1, 0);
-        odom_pub_->msg_.twist.covariance[35] = twist_cov(1, 1);
+        odom_pub_->msg_.twist.covariance[ 1] = twist_cov(0, 1);
+        odom_pub_->msg_.twist.covariance[ 5] = twist_cov(0, 2);
+        odom_pub_->msg_.twist.covariance[ 6] = twist_cov(1, 0);
+        odom_pub_->msg_.twist.covariance[ 7] = twist_cov(1, 1);
+        odom_pub_->msg_.twist.covariance[11] = twist_cov(1, 2);
+        odom_pub_->msg_.twist.covariance[30] = twist_cov(2, 0);
+        odom_pub_->msg_.twist.covariance[31] = twist_cov(2, 1);
+        odom_pub_->msg_.twist.covariance[35] = twist_cov(2, 2);
         odom_pub_->unlockAndPublish();
       }
 
@@ -648,7 +654,6 @@ namespace diff_drive_controller{
         (0)  (0)  (0)  (static_cast<double>(pose_cov_list[3])) (0)  (0)
         (0)  (0)  (0)  (0)  (static_cast<double>(pose_cov_list[4])) (0)
         (0)  (0)  (0)  (0)  (0)  (static_cast<double>(pose_cov_list[5]));
-    odom_pub_->msg_.twist.twist.linear.y  = 0;
     odom_pub_->msg_.twist.twist.linear.z  = 0;
     odom_pub_->msg_.twist.twist.angular.x = 0;
     odom_pub_->msg_.twist.twist.angular.y = 0;
@@ -684,8 +689,13 @@ namespace diff_drive_controller{
 
       Odometry::TwistCovariance twist_cov;
       twist_cov << odom_pub_->msg_.twist.covariance[ 0],
+                   odom_pub_->msg_.twist.covariance[ 1],
                    odom_pub_->msg_.twist.covariance[ 5],
+                   odom_pub_->msg_.twist.covariance[ 6],
+                   odom_pub_->msg_.twist.covariance[ 7],
+                   odom_pub_->msg_.twist.covariance[11],
                    odom_pub_->msg_.twist.covariance[30],
+                   odom_pub_->msg_.twist.covariance[31],
                    odom_pub_->msg_.twist.covariance[35];
       odometry_.setTwistCovariance(twist_cov);
 

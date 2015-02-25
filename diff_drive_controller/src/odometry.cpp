@@ -160,18 +160,36 @@ namespace diff_drive_controller
     linear_ = bacc::rolling_mean(linear_acc_);
     angular_ = bacc::rolling_mean(angular_acc_);
 
+    /// Integrate twist state:
+    const double direction = angular * 0.5;
+    const double cos_direction = cos(direction);
+    const double sin_direction = sin(direction);
+
+    x_dot_ = linear_ * cos_direction;
+    y_dot_ = linear_ * sin_direction;
+    yaw_dot_ = angular_;
+
+    // @todo we need the same thing for the 'exact' method (both equations and jacobians)
+    // @todo organize to have both methods, maybe putting the twist inside the pose update functions?!
+
     if (update_cov_)
     {
       /// Integrate odometry state and compute jacobian:
       const double  b_inv = 1.0 / wheel_separation_;
       const double dt_inv = 1.0 / dt;
 
-      const double dt_inv_2 = 0.5 * dt_inv;
       const double b_dt_inv = b_inv * dt_inv;
 
+      const double linear_sin = linear_ * sin_direction;
+      const double linear_cos = linear_ * cos_direction;
+
+      const double cos_direction_dt = 0.5 * cos_direction * dt_inv;
+      const double sin_direction_dt = 0.5 * sin_direction * dt_inv;
+
       TwistMotionJacobian jacobian_motion;
-      jacobian_motion << dt_inv_2,  dt_inv_2,
-                         b_dt_inv, -b_dt_inv;
+      jacobian_motion << cos_direction_dt + linear_sin, cos_direction_dt - linear_sin,
+                         sin_direction_dt - linear_cos, sin_direction_dt + linear_cos,
+                                              b_dt_inv, -b_dt_inv;
 
       /// Update motion increment covariance:
       Eigen::Matrix2d S; S << error_constant_right_ * std::abs(vr), 0.0,

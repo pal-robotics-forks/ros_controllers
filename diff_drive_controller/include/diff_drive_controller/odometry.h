@@ -60,15 +60,16 @@ namespace diff_drive_controller
   class Odometry
   {
   public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     /// Jacobian types:
     typedef Eigen::Matrix3d             PoseStateJacobian;
     typedef Eigen::Matrix<double, 3, 2> PoseMotionJacobian;
-    typedef Eigen::Matrix2d             TwistMotionJacobian;
+    typedef PoseMotionJacobian          TwistMotionJacobian;
 
     /// Covariance type:
-    typedef PoseStateJacobian   PoseCovariance;
-    typedef TwistMotionJacobian TwistCovariance;
+    typedef PoseStateJacobian PoseCovariance;
+    typedef PoseCovariance    TwistCovariance;
 
     /// Integration function, used to integrate the odometry:
     typedef boost::function<void(double, double, PoseStateJacobian*, PoseMotionJacobian*)> IntegrationFunction;
@@ -148,6 +149,33 @@ namespace diff_drive_controller
     double getY() const
     {
       return y_;
+    }
+
+    /**
+     * \brief x velocity getter
+     * \return x velocity [m/s]
+     */
+    double getXDot() const
+    {
+      return x_dot_;
+    }
+
+    /**
+     * \brief y velocity getter
+     * \return y velocity [m/s]
+     */
+    double getYDot() const
+    {
+      return y_dot_;
+    }
+
+    /**
+     * \brief yaw velocity getter
+     * \return yaw velocity [rad/s]
+     */
+    double getYawDot() const
+    {
+      return yaw_dot_;
     }
 
     /**
@@ -281,6 +309,11 @@ namespace diff_drive_controller
     double x_;        //   [m]
     double y_;        //   [m]
     double heading_;  // [rad]
+
+    /// Current velocity (pose derivative):
+    double x_dot_;    //   [m/s]
+    double y_dot_;    //   [m/s]
+    double yaw_dot_;  // [rad/s]
 
     /// Error constants kr and kl depend on the robot
     /// and the environment and should be experimentally
