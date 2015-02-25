@@ -57,29 +57,44 @@ if (CATKIN_ENABLE_TESTING)
     test/diff_drive_controller.test
     test/diff_drive_test.cpp)
   target_link_libraries(diff_drive_test ${catkin_LIBRARIES})
+
   add_rostest_gtest(diff_drive_nan_test
     test/diff_drive_controller_nan.test
     test/diff_drive_nan_test.cpp)
   target_link_libraries(diff_drive_nan_test ${catkin_LIBRARIES})
+
   add_rostest_gtest(diff_drive_limits_test
     test/diff_drive_controller_limits.test
     test/diff_drive_limits_test.cpp)
   target_link_libraries(diff_drive_limits_test ${catkin_LIBRARIES})
+
   add_rostest_gtest(diff_drive_timeout_test
     test/diff_drive_timeout.test
     test/diff_drive_timeout_test.cpp)
   target_link_libraries(diff_drive_timeout_test ${catkin_LIBRARIES})
+
   add_rostest(test/diff_drive_multipliers.test)
+
   add_rostest_gtest(diff_drive_fail_test
     test/diff_drive_wrong.test
     test/diff_drive_fail_test.cpp)
   target_link_libraries(diff_drive_fail_test ${catkin_LIBRARIES})
+
   add_rostest_gtest(diff_drive_no_preserve_turning_radius_test
     test/diff_drive_controller_no_preserve_turning_radius.test
     test/diff_drive_no_preserve_turning_radius_test.cpp)
   target_link_libraries(diff_drive_no_preserve_turning_radius_test ${catkin_LIBRARIES})
+
+  add_rostest_gtest(diff_drive_publish_wheel_data_test
+    test/diff_drive_controller_publish_wheel_data.test
+    test/diff_drive_publish_wheel_data_test.cpp)
+  target_link_libraries(diff_drive_publish_wheel_data_test ${catkin_LIBRARIES})
+
   add_rostest(test/diff_drive_bad_urdf.test)
+
   add_rostest(test/diff_drive_open_loop.test)
+
   add_rostest(test/skid_steer_controller.test)
+
   add_rostest(test/skid_steer_no_wheels.test)
 endif()
