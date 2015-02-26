@@ -34,6 +34,8 @@
 
 /*
  * Author: Bence Magyar
+ * Author: Enrique Fernández
+ * Author: Jeremie Deray
  */
 
 #include <cmath>
@@ -120,6 +122,7 @@ namespace diff_drive_controller{
     , wheel_joints_size_(0)
     , preserve_turning_radius_(true)
     , publish_cmd_(true)
+    , publish_wheel_data_(false)
   {
   }
 
@@ -216,6 +219,9 @@ namespace diff_drive_controller{
     // Publish limited velocity:
     controller_nh.param("publish_cmd", publish_cmd_, publish_cmd_);
 
+    // Publish wheel data:
+    controller_nh.param("publish_wheel_data", publish_wheel_data_, publish_wheel_data_);
+
     if (!setOdomParamsFromUrdf(root_nh, left_wheel_names[0], right_wheel_names[0]))
       return false;
 
@@ -223,6 +229,27 @@ namespace diff_drive_controller{
 
 
     cmd_vel_pub_.reset(new realtime_tools::RealtimePublisher<geometry_msgs::TwistStamped>(controller_nh, "cmd_vel_out", 100));
+
+    // Wheel data:
+    wheel_data_pub_.reset(new realtime_tools::RealtimePublisher<WheelData>(controller_nh, "wheel_data", 100));
+
+    wheel_data_pub_->msg_.left_wheel_joint_names.resize(wheel_joints_size_);
+    wheel_data_pub_->msg_.right_wheel_joint_names.resize(wheel_joints_size_);
+
+    wheel_data_pub_->msg_.left_wheel_joint_actual_position.resize(wheel_joints_size_, 0.0);
+    wheel_data_pub_->msg_.right_wheel_joint_actual_position.resize(wheel_joints_size_, 0.0);
+
+    wheel_data_pub_->msg_.left_wheel_joint_actual_velocity.resize(wheel_joints_size_);
+    wheel_data_pub_->msg_.right_wheel_joint_actual_velocity.resize(wheel_joints_size_);
+
+    wheel_data_pub_->msg_.left_wheel_joint_reference_velocity.resize(wheel_joints_size_);
+    wheel_data_pub_->msg_.right_wheel_joint_reference_velocity.resize(wheel_joints_size_);
+
+    for (size_t i = 0; i < wheel_joints_size_; ++i)
+    {
+      wheel_data_pub_->msg_.left_wheel_joint_names[i]  = left_wheel_names[i];
+      wheel_data_pub_->msg_.right_wheel_joint_names[i] = right_wheel_names[i];
+    }
 
     // Get the joint object to use in the realtime loop
     for (int i = 0; i < wheel_joints_size_; ++i)
@@ -347,6 +374,31 @@ namespace diff_drive_controller{
     {
       left_wheel_joints_[i].setCommand(vel_left);
       right_wheel_joints_[i].setCommand(vel_right);
+    }
+
+    // Publish wheel data:
+    if (publish_wheel_data_ && wheel_data_pub_->trylock())
+    {
+      for (size_t i = 0; i < wheel_joints_size_; ++i)
+      {
+        //if (estimate_velocity_from_position_)
+        //{
+        //  wheel_data_pub_->msg_.left_wheel_joint_actual_velocity[i]  = (left_wheel_joints_[i].getPosition()  - wheel_data_pub_->msg_.left_wheel_joint_actual_position[i]) / cmd_dt;
+        //  wheel_data_pub_->msg_.right_wheel_joint_actual_velocity[i] = (right_wheel_joints_[i].getPosition() - wheel_data_pub_->msg_.right_wheel_joint_actual_position[i]) / cmd_dt;
+        //}
+        //else
+        //{
+        wheel_data_pub_->msg_.left_wheel_joint_actual_velocity[i]  = left_wheel_joints_[i].getVelocity();
+        wheel_data_pub_->msg_.right_wheel_joint_actual_velocity[i] = right_wheel_joints_[i].getVelocity();
+        //}
+
+        wheel_data_pub_->msg_.left_wheel_joint_actual_position[i]  = left_wheel_joints_[i].getPosition();
+        wheel_data_pub_->msg_.right_wheel_joint_actual_position[i] = right_wheel_joints_[i].getPosition();
+
+        wheel_data_pub_->msg_.left_wheel_joint_reference_velocity[i]  = vel_left;
+        wheel_data_pub_->msg_.right_wheel_joint_reference_velocity[i] = vel_right;
+      }
+      wheel_data_pub_->unlockAndPublish();
     }
   }
 

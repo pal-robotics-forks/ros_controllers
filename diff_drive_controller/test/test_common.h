@@ -35,6 +35,7 @@
 
 #include <geometry_msgs/Twist.h>
 #include <nav_msgs/Odometry.h>
+#include <diff_drive_controller/WheelData.h>
 #include <tf/tf.h>
 
 #include <std_srvs/Empty.h>
@@ -45,6 +46,7 @@ const double POSITION_TOLERANCE = 0.01; // 1 cm-s precision
 const double VELOCITY_TOLERANCE = 0.02; // 2 cm-s-1 precision
 const double JERK_LINEAR_VELOCITY_TOLERANCE = 0.10; // 10 cm-s-1 precision
 const double JERK_ANGULAR_VELOCITY_TOLERANCE = 0.05; // 3 deg-s-1 precision
+const double WHEEL_VELOCITY_TOLERANCE = 0.01; // 0.6 deg-s-1 precision
 const double ORIENTATION_TOLERANCE = 0.03; // 0.57 degree precision
 
 class DiffDriveControllerTest : public ::testing::Test
@@ -54,6 +56,7 @@ public:
   DiffDriveControllerTest()
   : cmd_pub(nh.advertise<geometry_msgs::Twist>("cmd_vel", 100))
   , odom_sub(nh.subscribe("odom", 100, &DiffDriveControllerTest::odomCallback, this))
+  , wheel_data_sub(nh.subscribe("wheel_data", 100, &DiffDriveControllerTest::wheelDataCallback, this))
   , start_srv(nh.serviceClient<std_srvs::Empty>("start"))
   , stop_srv(nh.serviceClient<std_srvs::Empty>("stop"))
   {
@@ -62,9 +65,11 @@ public:
   ~DiffDriveControllerTest()
   {
     odom_sub.shutdown();
+    wheel_data_sub.shutdown();
   }
 
   nav_msgs::Odometry getLastOdom(){ return last_odom; }
+  diff_drive_controller::WheelData getLastWheelData(){ return last_wheel_data; }
   void publish(geometry_msgs::Twist cmd_vel){ cmd_pub.publish(cmd_vel); }
   bool isControllerAlive(){ return (odom_sub.getNumPublishers() > 0) && (cmd_pub.getNumSubscribers() > 0); }
 
@@ -75,18 +80,28 @@ private:
   ros::NodeHandle nh;
   ros::Publisher cmd_pub;
   ros::Subscriber odom_sub;
+  ros::Subscriber wheel_data_sub;
   nav_msgs::Odometry last_odom;
+  diff_drive_controller::WheelData last_wheel_data;
 
   ros::ServiceClient start_srv;
   ros::ServiceClient stop_srv;
 
-  void odomCallback(const nav_msgs::Odometry& odom)
+  void odomCallback(const nav_msgs::OdometryConstPtr& odom)
   {
-    ROS_INFO_STREAM("Callback reveived: pos.x: " << odom.pose.pose.position.x
-                     << ", orient.z: " << odom.pose.pose.orientation.z
-                     << ", lin_est: " << odom.twist.twist.linear.x
-                     << ", ang_est: " << odom.twist.twist.angular.z);
-    last_odom = odom;
+    ROS_INFO_STREAM("Odom callback reveived: pos.x: " << odom->pose.pose.position.x
+                     << ", orient.z: " << odom->pose.pose.orientation.z
+                     << ", lin_est: " << odom->twist.twist.linear.x
+                     << ", ang_est: " << odom->twist.twist.angular.z);
+
+    last_odom = *odom;
+  }
+
+  void wheelDataCallback(const diff_drive_controller::WheelDataConstPtr& wheel_data)
+  {
+    ROS_INFO_STREAM("Wheel data callback reveived");
+
+    last_wheel_data = *wheel_data;
   }
 };
 
