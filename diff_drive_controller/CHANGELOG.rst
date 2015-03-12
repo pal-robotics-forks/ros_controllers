@@ -2,8 +2,8 @@
 Changelog for package diff_drive_controller
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.0 (2015-03-12)
+------------------
 * update test/diffbot_multipliers.yaml
 * per wheel radius multiplier
 * moved check on dt on top of update
