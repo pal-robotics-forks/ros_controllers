@@ -105,6 +105,7 @@ namespace diff_drive_controller
     ros::Duration publish_period_;
     ros::Time last_state_publish_time_;
     bool open_loop_;
+    bool init_;
 
     /// Hardware handles:
     std::vector<hardware_interface::JointHandle> left_wheel_joints_;
@@ -175,6 +176,13 @@ namespace diff_drive_controller
      * \brief Brakes the wheels, i.e. sets the velocity to 0
      */
     void brake();
+
+    /**
+     * \brief Read the left and right wheel position
+     * \param [out] left_pos Left wheel position [rad]
+     * \param [out] right_pos Right wheel position [rad]
+     */
+    bool readPosition(double& left_pos, double& right_pos);
 
     /**
      * \brief Velocity command callback

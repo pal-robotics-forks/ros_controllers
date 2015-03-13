@@ -66,11 +66,15 @@ namespace diff_drive_controller
   {
   }
 
-  void Odometry::init(const ros::Time& time)
+  void Odometry::init(double left_pos, double right_pos, const ros::Time& time)
   {
     // Reset accumulators and timestamp:
     resetAccumulators();
     timestamp_ = time;
+
+    // Wheel positions used for velocity estimation need reset
+    left_wheel_old_pos_ = left_pos;
+    right_wheel_old_pos_ = right_pos;
   }
 
   bool Odometry::update(double left_pos, double right_pos, const ros::Time &time)
