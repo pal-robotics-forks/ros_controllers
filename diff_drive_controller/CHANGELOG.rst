@@ -2,6 +2,15 @@
 Changelog for package diff_drive_controller
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix Preserve Turning Radius
+  This will re-check the limit factor for linear/angular if the min is from angular/linear.
+  Thanks to @jordiadell
+* Fix limit factors when preserving turning radius
+* Reset old wheel pos for odometry
+* Contributors: Bence Magyar, Enrique Fernandez
+
 0.2.0 (2015-03-12)
 ------------------
 * update test/diffbot_multipliers.yaml
