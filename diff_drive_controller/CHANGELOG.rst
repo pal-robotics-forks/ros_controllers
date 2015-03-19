@@ -2,8 +2,8 @@
 Changelog for package diff_drive_controller
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.1 (2015-03-19)
+------------------
 * Fix Preserve Turning Radius
   This will re-check the limit factor for linear/angular if the min is from angular/linear.
   Thanks to @jordiadell
