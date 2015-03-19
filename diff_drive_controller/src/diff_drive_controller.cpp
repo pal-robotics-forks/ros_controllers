@@ -358,10 +358,16 @@ namespace diff_drive_controller{
     const double f_ang = limiter_ang_.limit(curr_cmd.ang, last0_cmd_.ang, last1_cmd_.ang, cmd_dt);
     if (preserve_turning_radius_ && f_lin != f_ang)
     {
-      const double f = std::min(f_lin, f_ang);
-
-      curr_cmd.lin *= f / f_lin;
-      curr_cmd.ang *= f / f_ang;
+      if (f_lin < f_ang)
+      {
+        curr_cmd.ang *= f_lin / f_ang;
+        limiter_ang_.limit(curr_cmd.ang, last0_cmd_.ang, last1_cmd_.ang, cmd_dt);
+      }
+      else
+      {
+        curr_cmd.lin *= f_ang / f_lin;
+        limiter_lin_.limit(curr_cmd.lin, last0_cmd_.lin, last1_cmd_.lin, cmd_dt);
+      }
     }
     last1_cmd_ = last0_cmd_;
     last0_cmd_ = curr_cmd;
