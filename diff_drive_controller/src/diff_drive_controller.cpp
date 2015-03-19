@@ -111,6 +111,7 @@ namespace diff_drive_controller{
 
   DiffDriveController::DiffDriveController()
     : open_loop_(false)
+    , init_(false)
     , command_struct_()
     , wheel_separation_(0.0)
     , wheel_radius_(0.0)
@@ -291,23 +292,20 @@ namespace diff_drive_controller{
     }
     else
     {
-      double left_pos  = 0.0;
-      double right_pos = 0.0;
-      for (size_t i = 0; i < wheel_joints_size_; ++i)
+      double left_pos, right_pos;
+      if (!readPosition(left_pos, right_pos))
+        return;
+
+      if (init_)
       {
-        const double lp = left_wheel_joints_[i].getPosition();
-        const double rp = right_wheel_joints_[i].getPosition();
-        if (std::isnan(lp) || std::isnan(rp))
-          return;
-
-        left_pos  += lp;
-        right_pos += rp;
+        // Estimate linear and angular velocity using joint information
+        odometry_.update(left_pos, right_pos, time);
       }
-      left_pos  /= wheel_joints_size_;
-      right_pos /= wheel_joints_size_;
-
-      // Estimate linear and angular velocity using joint information
-      odometry_.update(left_pos, right_pos, time);
+      else
+      {
+        odometry_.init(left_pos, right_pos, time);
+        init_ = true;
+      }
     }
 
     // Publish odometry message
@@ -426,7 +424,7 @@ namespace diff_drive_controller{
     // Register starting time used to keep fixed rate
     last_state_publish_time_ = time;
 
-    odometry_.init(time);
+    init_ = false;
   }
 
   void DiffDriveController::stopping(const ros::Time& time)
@@ -442,6 +440,26 @@ namespace diff_drive_controller{
       left_wheel_joints_[i].setCommand(vel);
       right_wheel_joints_[i].setCommand(vel);
     }
+  }
+
+  bool DiffDriveController::readPosition(double& left_pos, double& right_pos)
+  {
+    left_pos = right_pos = 0.0;
+    for (size_t i = 0; i < wheel_joints_size_; ++i)
+    {
+      const double lp = left_wheel_joints_[i].getPosition();
+      const double rp = right_wheel_joints_[i].getPosition();
+      if (std::isnan(lp) || std::isnan(rp))
+        return false;
+
+      left_pos  += lp;
+      right_pos += rp;
+    }
+
+    left_pos  /= wheel_joints_size_;
+    right_pos /= wheel_joints_size_;
+
+    return true;
   }
 
   void DiffDriveController::cmdVelCallback(const geometry_msgs::Twist& command)
