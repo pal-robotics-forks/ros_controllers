@@ -242,6 +242,8 @@ namespace diff_drive_controller{
     if (!setOdomParamsFromUrdf(root_nh, left_wheel_names[0], right_wheel_names[0]))
       return false;
 
+    // @todo getWheelVelocity() for _vel_left_max and _vel_right_max
+
     setOdomPubFields(root_nh, controller_nh);
 
 
@@ -387,8 +389,22 @@ namespace diff_drive_controller{
     const double rwr = right_wheel_radius_multiplier_ * wheel_radius_;
 
     // Compute wheels velocities:
-    const double vel_left  = (curr_cmd.lin - curr_cmd.ang * ws / 2.0)/lwr;
-    const double vel_right = (curr_cmd.lin + curr_cmd.ang * ws / 2.0)/rwr;
+    double vel_left  = (curr_cmd.lin - curr_cmd.ang * ws / 2.0)/lwr;
+    double vel_right = (curr_cmd.lin + curr_cmd.ang * ws / 2.0)/rwr;
+
+    if (std::abs(vel_left) > _vel_left_max)
+    {
+      const double f = _vel_left_max / std::abs(vel_left);
+      vel_left  *= f;
+      vel_right *= f;
+    }
+
+    if (std::abs(vel_right) > _vel_right_max)
+    {
+      const double f = _vel_right_max / std::abs(vel_right);
+      vel_left  *= f;
+      vel_right *= f;
+    }
 
     // Set wheels velocities:
     for (size_t i = 0; i < wheel_joints_size_; ++i)
