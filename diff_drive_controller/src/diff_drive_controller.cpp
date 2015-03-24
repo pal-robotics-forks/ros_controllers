@@ -253,8 +253,6 @@ namespace diff_drive_controller{
     if (!setOdomParamsFromUrdf(root_nh, left_wheel_names[0], right_wheel_names[0]))
       return false;
 
-    // @todo getWheelVelocity() for _vel_left_max and _vel_right_max
-
     setOdomPubFields(root_nh, controller_nh);
 
 
@@ -401,19 +399,37 @@ namespace diff_drive_controller{
     {
       for (size_t i = 0; i < wheel_joints_size_; ++i)
       {
+        double& left_actual_position  = wheel_data_pub_->msg_.left_wheel_joint_actual_position[i];
+        double& right_actual_position = wheel_data_pub_->msg_.right_wheel_joint_actual_position[i];
+
+        double& left_actual_velocity  = wheel_data_pub_->msg_.left_wheel_joint_actual_velocity[i];
+        double& right_actual_velocity = wheel_data_pub_->msg_.right_wheel_joint_actual_velocity[i];
+
+        double& left_actual_acceleration  = wheel_data_pub_->msg_.left_wheel_joint_actual_acceleration[i];
+        double& right_actual_acceleration = wheel_data_pub_->msg_.right_wheel_joint_actual_acceleration[i];
+
         //if (estimate_velocity_from_position_)
         //{
-        //  wheel_data_pub_->msg_.left_wheel_joint_actual_velocity[i]  = (left_wheel_joints_[i].getPosition()  - wheel_data_pub_->msg_.left_wheel_joint_actual_position[i]) / cmd_dt;
-        //  wheel_data_pub_->msg_.right_wheel_joint_actual_velocity[i] = (right_wheel_joints_[i].getPosition() - wheel_data_pub_->msg_.right_wheel_joint_actual_position[i]) / cmd_dt;
+        //  const double left_actual_velocity_estimated  = (left_wheel_joints_[i].getPosition()  - left_actual_position ) / cmd_dt;
+        //  const double right_actual_velocity_estimated = (right_wheel_joints_[i].getPosition() - right_actual_position) / cmd_dt;
+        //
+        //  left_actual_acceleration  = (left_actual_velocity_estimated  - left_actual_velocity ) / cmd_dt;
+        //  right_actual_acceleration = (right_actual_velocity_estimated - right_actual_velocity) / cmd_dt;
+        //
+        //  left_actual_velocity  = left_actual_velocity_estimated  ;
+        //  right_actual_velocity = right_actual_velocity_estimated ;
         //}
         //else
         //{
-        wheel_data_pub_->msg_.left_wheel_joint_actual_velocity[i]  = left_wheel_joints_[i].getVelocity();
-        wheel_data_pub_->msg_.right_wheel_joint_actual_velocity[i] = right_wheel_joints_[i].getVelocity();
+        left_actual_acceleration  = (left_wheel_joints_[i].getVelocity()  - left_actual_velocity ) / cmd_dt;
+        right_actual_acceleration = (right_wheel_joints_[i].getVelocity() - right_actual_velocity) / cmd_dt;
+
+        left_actual_velocity  = left_wheel_joints_[i].getVelocity();
+        right_actual_velocity = right_wheel_joints_[i].getVelocity();
         //}
 
-        wheel_data_pub_->msg_.left_wheel_joint_actual_position[i]  = left_wheel_joints_[i].getPosition();
-        wheel_data_pub_->msg_.right_wheel_joint_actual_position[i] = right_wheel_joints_[i].getPosition();
+        left_actual_position  = left_wheel_joints_[i].getPosition();
+        right_actual_position = right_wheel_joints_[i].getPosition();
 
         wheel_data_pub_->msg_.left_wheel_joint_reference_velocity[i]  = vel_left;
         wheel_data_pub_->msg_.right_wheel_joint_reference_velocity[i] = vel_right;
