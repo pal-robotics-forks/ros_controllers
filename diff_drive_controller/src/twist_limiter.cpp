@@ -36,9 +36,11 @@
  * Author: Enrique Fernández
  */
 
+#include <cmath>
+
 #include <algorithm>
 
-#include <diff_drive_controller/speed_limiter.h>
+#include <diff_drive_controller/twist_limiter.h>
 
 template<typename T>
 T clamp(T x, T min, T max)
@@ -49,89 +51,68 @@ T clamp(T x, T min, T max)
 namespace diff_drive_controller
 {
 
-  SpeedLimiter::SpeedLimiter(
-    bool has_velocity_limits,
-    bool has_acceleration_limits,
-    bool has_jerk_limits,
-    double min_velocity,
-    double max_velocity,
-    double min_acceleration,
-    double max_acceleration,
-    double min_jerk,
-    double max_jerk
+  TwistLimiter::TwistLimiter(
+    double max_left_wheel_joint_velocity,
+    double max_right_wheel_joint_velocity,
+    double left_wheel_radius,
+    double right_wheel_radius,
+    double wheel_separation
   )
-  : has_velocity_limits(has_velocity_limits)
-  , has_acceleration_limits(has_acceleration_limits)
-  , has_jerk_limits(has_jerk_limits)
-  , min_velocity(min_velocity)
-  , max_velocity(max_velocity)
-  , min_acceleration(min_acceleration)
-  , max_acceleration(max_acceleration)
-  , min_jerk(min_jerk)
-  , max_jerk(max_jerk)
+  : max_left_wheel_joint_velocity(max_left_wheel_joint_velocity)
+  , max_right_wheel_joint_velocity(max_right_wheel_joint_velocity)
+  , left_wheel_radius(left_wheel_radius)
+  , right_wheel_radius(right_wheel_radius)
+  , wheel_separation(wheel_separation)
   {
   }
 
-  double SpeedLimiter::limit(double& v, double v0, double v1, double dt)
+  double TwistLimiter::limit(double& v, double& w, double v0, double w0, double v1, double w1, double dt)
   {
-    const double tmp = v;
+    limitVelocity(v, w);
 
-    limitJerk(v, v0, v1, dt);
-    limitAcceleration(v, v0, dt);
-    limitVelocity(v);
+    const double dv = v - v0;
+    const double dw = w - w0;
 
-    return tmp != 0.0 ? v / tmp : 1.0;
+    const double tmp_v = v;
+    const double tmp_w = w;
+
+    linear.limitAcceleration(v, v0, dt);
+    linear.limitJerk(v, v0, v1, dt);
+
+    angular.limitAcceleration(w, w0, dt);
+    angular.limitJerk(w, w0, w1, dt);
+
+    const double kv = dv / (v - v0);
+    const double kw = dw / (w - w0);
+
+    const double k = std::min(kv, kw);
+
+    v = tmp_v + k * dv;
+    w = tmp_w + k * dw;
+
+    return k; // @todo THIS ISN'T THE CORRECT k!!!
   }
 
-  double SpeedLimiter::limitVelocity(double& v)
+  double TwistLimiter::limitVelocity(double& v, double& w)
   {
-    const double tmp = v;
+    const double vW = std::abs(v) + std::abs(w) * wheel_separation / 2.0;
+    const double vL = vW / left_wheel_radius;
+    const double vR = vW / right_wheel_radius;
 
-    if (has_velocity_limits)
-    {
-      v = clamp(v, min_velocity, max_velocity);
-    }
+    const double kL = max_left_wheel_joint_velocity  / vL;
+    const double kR = max_right_wheel_joint_velocity / vR;
+    const double kv = linear.limitVelocity(v);
+    const double kw = angular.limitVelocity(w);
 
-    return tmp != 0.0 ? v / tmp : 1.0;
-  }
+    const double k = std::min(kL,
+                     std::min(kR,
+                     std::min(kv,
+                     std::min(kw, 1.0))));
 
-  double SpeedLimiter::limitAcceleration(double& v, double v0, double dt)
-  {
-    const double tmp = v;
+    v *= k;
+    w *= k;
 
-    if (has_acceleration_limits)
-    {
-      const double dv_min = min_acceleration * dt;
-      const double dv_max = max_acceleration * dt;
-
-      const double dv = clamp(v - v0, dv_min, dv_max);
-
-      v = v0 + dv;
-    }
-
-    return tmp != 0.0 ? v / tmp : 1.0;
-  }
-
-  double SpeedLimiter::limitJerk(double& v, double v0, double v1, double dt)
-  {
-    const double tmp = v;
-
-    if (has_jerk_limits)
-    {
-      const double dv  = v  - v0;
-      const double dv0 = v0 - v1;
-
-      const double dt2 = 2. * dt * dt;
-
-      const double da_min = min_jerk * dt2;
-      const double da_max = max_jerk * dt2;
-
-      const double da = clamp(dv - dv0, da_min, da_max);
-
-      v = v0 + dv0 + da;
-    }
-
-    return tmp != 0.0 ? v / tmp : 1.0;
+    return k;
   }
 
 } // namespace diff_drive_controller

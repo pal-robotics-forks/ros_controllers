@@ -49,7 +49,7 @@
 #include <realtime_tools/realtime_publisher.h>
 
 #include <diff_drive_controller/odometry.h>
-#include <diff_drive_controller/speed_limiter.h>
+#include <diff_drive_controller/twist_limiter.h>
 
 namespace diff_drive_controller
 {
@@ -156,11 +156,12 @@ namespace diff_drive_controller
     /// Number of wheel joints:
     size_t wheel_joints_size_;
 
-    /// Speed limiters:
+    /// Twist limiters:
     Commands last1_cmd_;
     Commands last0_cmd_;
-    SpeedLimiter limiter_lin_;
-    SpeedLimiter limiter_ang_;
+    TwistLimiter limiter_;
+    double max_left_wheel_joint_velocity_;
+    double max_right_wheel_joint_velocity_;
 
     /// Preserve turning radius if limiting speed:
     bool preserve_turning_radius_;
@@ -209,6 +210,16 @@ namespace diff_drive_controller
      * \param right_wheel_name Name of the right wheel joint
      */
     bool setOdomParamsFromUrdf(ros::NodeHandle& root_nh,
+                               const std::string& left_wheel_name,
+                               const std::string& right_wheel_name);
+
+    /**
+     * \brief Sets max wheel joint velocity parameters from the URDF
+     * \param root_nh Root node handle
+     * \param left_wheel_name Name of the left wheel joint
+     * \param right_wheel_name Name of the right wheel joint
+     */
+    bool setMaxWheelJointVelocity(ros::NodeHandle& root_nh,
                                const std::string& left_wheel_name,
                                const std::string& right_wheel_name);
 

@@ -44,6 +44,8 @@
 
 #include <urdf_parser/urdf_parser.h>
 
+#include <joint_limits_interface/joint_limits_urdf.h>
+
 #include <boost/assign.hpp>
 
 #include <diff_drive_controller/diff_drive_controller.h>
@@ -209,26 +211,35 @@ namespace diff_drive_controller{
     controller_nh.param("enable_odom_tf", enable_odom_tf_, enable_odom_tf_);
     ROS_INFO_STREAM_NAMED(name_, "Publishing to tf is " << (enable_odom_tf_?"enabled":"disabled"));
 
-    // Velocity and acceleration limits:
-    controller_nh.param("linear/x/has_velocity_limits"    , limiter_lin_.has_velocity_limits    , limiter_lin_.has_velocity_limits    );
-    controller_nh.param("linear/x/has_acceleration_limits", limiter_lin_.has_acceleration_limits, limiter_lin_.has_acceleration_limits);
-    controller_nh.param("linear/x/has_jerk_limits"        , limiter_lin_.has_jerk_limits        , limiter_lin_.has_jerk_limits        );
-    controller_nh.param("linear/x/max_velocity"           , limiter_lin_.max_velocity           ,  limiter_lin_.max_velocity          );
-    controller_nh.param("linear/x/min_velocity"           , limiter_lin_.min_velocity           , -limiter_lin_.max_velocity          );
-    controller_nh.param("linear/x/max_acceleration"       , limiter_lin_.max_acceleration       ,  limiter_lin_.max_acceleration      );
-    controller_nh.param("linear/x/min_acceleration"       , limiter_lin_.min_acceleration       , -limiter_lin_.max_acceleration      );
-    controller_nh.param("linear/x/max_jerk"               , limiter_lin_.max_jerk               ,  limiter_lin_.max_jerk              );
-    controller_nh.param("linear/x/min_jerk"               , limiter_lin_.min_jerk               , -limiter_lin_.max_jerk              );
+    // Twist velocity, acceleration and jerk limits:
+    controller_nh.param("linear/x/has_velocity_limits"    , limiter_.linear.has_velocity_limits    , limiter_.linear.has_velocity_limits    );
+    controller_nh.param("linear/x/has_acceleration_limits", limiter_.linear.has_acceleration_limits, limiter_.linear.has_acceleration_limits);
+    controller_nh.param("linear/x/has_jerk_limits"        , limiter_.linear.has_jerk_limits        , limiter_.linear.has_jerk_limits        );
+    controller_nh.param("linear/x/max_velocity"           , limiter_.linear.max_velocity           ,  limiter_.linear.max_velocity          );
+    controller_nh.param("linear/x/min_velocity"           , limiter_.linear.min_velocity           , -limiter_.linear.max_velocity          );
+    controller_nh.param("linear/x/max_acceleration"       , limiter_.linear.max_acceleration       ,  limiter_.linear.max_acceleration      );
+    controller_nh.param("linear/x/min_acceleration"       , limiter_.linear.min_acceleration       , -limiter_.linear.max_acceleration      );
+    controller_nh.param("linear/x/max_jerk"               , limiter_.linear.max_jerk               ,  limiter_.linear.max_jerk              );
+    controller_nh.param("linear/x/min_jerk"               , limiter_.linear.min_jerk               , -limiter_.linear.max_jerk              );
 
-    controller_nh.param("angular/z/has_velocity_limits"    , limiter_ang_.has_velocity_limits    , limiter_ang_.has_velocity_limits    );
-    controller_nh.param("angular/z/has_acceleration_limits", limiter_ang_.has_acceleration_limits, limiter_ang_.has_acceleration_limits);
-    controller_nh.param("angular/z/has_jerk_limits"        , limiter_ang_.has_jerk_limits        , limiter_ang_.has_jerk_limits        );
-    controller_nh.param("angular/z/max_velocity"           , limiter_ang_.max_velocity           ,  limiter_ang_.max_velocity          );
-    controller_nh.param("angular/z/min_velocity"           , limiter_ang_.min_velocity           , -limiter_ang_.max_velocity          );
-    controller_nh.param("angular/z/max_acceleration"       , limiter_ang_.max_acceleration       ,  limiter_ang_.max_acceleration      );
-    controller_nh.param("angular/z/min_acceleration"       , limiter_ang_.min_acceleration       , -limiter_ang_.max_acceleration      );
-    controller_nh.param("angular/z/max_jerk"               , limiter_ang_.max_jerk               ,  limiter_ang_.max_jerk              );
-    controller_nh.param("angular/z/min_jerk"               , limiter_ang_.min_jerk               , -limiter_ang_.max_jerk              );
+    controller_nh.param("angular/z/has_velocity_limits"    , limiter_.angular.has_velocity_limits    , limiter_.angular.has_velocity_limits    );
+    controller_nh.param("angular/z/has_acceleration_limits", limiter_.angular.has_acceleration_limits, limiter_.angular.has_acceleration_limits);
+    controller_nh.param("angular/z/has_jerk_limits"        , limiter_.angular.has_jerk_limits        , limiter_.angular.has_jerk_limits        );
+    controller_nh.param("angular/z/max_velocity"           , limiter_.angular.max_velocity           ,  limiter_.angular.max_velocity          );
+    controller_nh.param("angular/z/min_velocity"           , limiter_.angular.min_velocity           , -limiter_.angular.max_velocity          );
+    controller_nh.param("angular/z/max_acceleration"       , limiter_.angular.max_acceleration       ,  limiter_.angular.max_acceleration      );
+    controller_nh.param("angular/z/min_acceleration"       , limiter_.angular.min_acceleration       , -limiter_.angular.max_acceleration      );
+    controller_nh.param("angular/z/max_jerk"               , limiter_.angular.max_jerk               ,  limiter_.angular.max_jerk              );
+    controller_nh.param("angular/z/min_jerk"               , limiter_.angular.min_jerk               , -limiter_.angular.max_jerk              );
+
+    if (!setMaxWheelJointVelocity(root_nh, left_wheel_names[0], right_wheel_names[0]))
+      return false;
+
+    limiter_.setMaxLeftWheelJointVelocity(max_left_wheel_joint_velocity_);
+    limiter_.setMaxRightWheelJointVelocity(max_right_wheel_joint_velocity_);
+    limiter_.setWheelSeparation(wheel_separation_multiplier_ * wheel_separation_);
+    limiter_.setLeftWheelRadius(left_wheel_radius_multiplier_ * wheel_radius_);
+    limiter_.setRightWheelRadius(right_wheel_radius_multiplier_ * wheel_radius_);
 
     // Preserve turning radius if limiting velocity/acceleration/jerk:
     controller_nh.param("preserve_turning_radius", preserve_turning_radius_, preserve_turning_radius_);
@@ -241,6 +252,8 @@ namespace diff_drive_controller{
 
     if (!setOdomParamsFromUrdf(root_nh, left_wheel_names[0], right_wheel_names[0]))
       return false;
+
+    // @todo getWheelVelocity() for _vel_left_max and _vel_right_max
 
     setOdomPubFields(root_nh, controller_nh);
 
@@ -354,21 +367,7 @@ namespace diff_drive_controller{
 
     // Limit velocities and accelerations:
     const double cmd_dt(period.toSec());
-    const double f_lin = limiter_lin_.limit(curr_cmd.lin, last0_cmd_.lin, last1_cmd_.lin, cmd_dt);
-    const double f_ang = limiter_ang_.limit(curr_cmd.ang, last0_cmd_.ang, last1_cmd_.ang, cmd_dt);
-    if (preserve_turning_radius_ && f_lin != f_ang)
-    {
-      if (f_lin < f_ang)
-      {
-        curr_cmd.ang *= f_lin / f_ang;
-        limiter_ang_.limit(curr_cmd.ang, last0_cmd_.ang, last1_cmd_.ang, cmd_dt);
-      }
-      else
-      {
-        curr_cmd.lin *= f_ang / f_lin;
-        limiter_lin_.limit(curr_cmd.lin, last0_cmd_.lin, last1_cmd_.lin, cmd_dt);
-      }
-    }
+    limiter_.limit(curr_cmd.lin, curr_cmd.ang, last0_cmd_.lin, last0_cmd_.ang, last1_cmd_.lin, last1_cmd_.ang, cmd_dt);
     last1_cmd_ = last0_cmd_;
     last0_cmd_ = curr_cmd;
 
@@ -387,8 +386,8 @@ namespace diff_drive_controller{
     const double rwr = right_wheel_radius_multiplier_ * wheel_radius_;
 
     // Compute wheels velocities:
-    const double vel_left  = (curr_cmd.lin - curr_cmd.ang * ws / 2.0)/lwr;
-    const double vel_right = (curr_cmd.lin + curr_cmd.ang * ws / 2.0)/rwr;
+    double vel_left  = (curr_cmd.lin - curr_cmd.ang * ws / 2.0)/lwr;
+    double vel_right = (curr_cmd.lin + curr_cmd.ang * ws / 2.0)/rwr;
 
     // Set wheels velocities:
     for (size_t i = 0; i < wheel_joints_size_; ++i)
@@ -548,8 +547,8 @@ namespace diff_drive_controller{
     // Parse robot description
     const std::string model_param_name = "robot_description";
     bool res = root_nh.hasParam(model_param_name);
-    std::string robot_model_str="";
-    if (!res || !root_nh.getParam(model_param_name,robot_model_str))
+    std::string robot_model_str = "";
+    if (!res || !root_nh.getParam(model_param_name, robot_model_str))
     {
       ROS_ERROR_NAMED(name_, "Robot descripion couldn't be retrieved from param server.");
       return false;
@@ -599,6 +598,7 @@ namespace diff_drive_controller{
                           "Odometry params : wheel separation " << ws
                           << ", left wheel radius "  << lwr
                           << ", right wheel radius " << rwr);
+
     return true;
   }
 
@@ -647,6 +647,58 @@ namespace diff_drive_controller{
     tf_odom_pub_->msg_.transforms[0].transform.translation.z = 0.0;
     tf_odom_pub_->msg_.transforms[0].child_frame_id = base_frame_id_;
     tf_odom_pub_->msg_.transforms[0].header.frame_id = "odom";
+  }
+
+  bool DiffDriveController::setMaxWheelJointVelocity(ros::NodeHandle& root_nh,
+                             const std::string& left_wheel_name,
+                             const std::string& right_wheel_name)
+  {
+    // Parse robot description
+    const std::string model_param_name = "robot_description";
+    bool res = root_nh.hasParam(model_param_name);
+    std::string robot_model_str = "";
+    if (!res || !root_nh.getParam(model_param_name, robot_model_str))
+    {
+      ROS_ERROR_NAMED(name_, "Robot descripion couldn't be retrieved from param server.");
+      return false;
+    }
+
+    boost::shared_ptr<urdf::ModelInterface> model(urdf::parseURDF(robot_model_str));
+
+    // Get wheel joint
+    boost::shared_ptr<const urdf::Joint> left_wheel_joint(model->getJoint(left_wheel_name));
+    if (!left_wheel_joint)
+    {
+      ROS_ERROR_STREAM_NAMED(name_, left_wheel_name
+                             << " couldn't be retrieved from model description");
+      return false;
+    }
+    boost::shared_ptr<const urdf::Joint> right_wheel_joint(model->getJoint(right_wheel_name));
+    if (!right_wheel_joint)
+    {
+      ROS_ERROR_STREAM_NAMED(name_, right_wheel_name
+                             << " couldn't be retrieved from model description");
+      return false;
+    }
+
+    // Get joint limits
+    joint_limits_interface::JointLimits left_wheel_joint_limits;
+    if (!getJointLimits(left_wheel_joint, left_wheel_joint_limits))
+    {
+      ROS_ERROR_STREAM_NAMED(name_, "Couldn't retrieve " << left_wheel_name << " joint limits");
+      return false;
+    }
+    joint_limits_interface::JointLimits right_wheel_joint_limits;
+    if (!getJointLimits(right_wheel_joint, right_wheel_joint_limits))
+    {
+      ROS_ERROR_STREAM_NAMED(name_, "Couldn't retrieve " << right_wheel_name << " joint limits");
+      return false;
+    }
+
+    max_left_wheel_joint_velocity_  = left_wheel_joint_limits.max_velocity;
+    max_right_wheel_joint_velocity_ = right_wheel_joint_limits.max_velocity;
+
+    return true;
   }
 
 } // namespace diff_drive_controller

@@ -85,7 +85,7 @@ namespace diff_drive_controller
      * \param [in, out] v Velocity [m/s]
      * \return Limiting factor (1.0 if none)
      */
-    double limit_velocity(double& v);
+    double limitVelocity(double& v);
 
     /**
      * \brief Limit the acceleration
@@ -94,7 +94,7 @@ namespace diff_drive_controller
      * \param [in]      dt Time step [s]
      * \return Limiting factor (1.0 if none)
      */
-    double limit_acceleration(double& v, double v0, double dt);
+    double limitAcceleration(double& v, double v0, double dt);
 
     /**
      * \brief Limit the jerk
@@ -105,7 +105,7 @@ namespace diff_drive_controller
      * \return Limiting factor (1.0 if none)
      * \see http://en.wikipedia.org/wiki/Jerk_%28physics%29#Motion_control
      */
-    double limit_jerk(double& v, double v0, double v1, double dt);
+    double limitJerk(double& v, double v0, double v1, double dt);
 
   public:
     // Enable/Disable velocity/acceleration/jerk limits:

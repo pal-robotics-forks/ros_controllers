@@ -5,9 +5,11 @@ find_package(catkin REQUIRED COMPONENTS
     controller_interface
     message_generation
     std_msgs
-    urdf
+    nav_msgs
+    realtime_tools
     tf
-    nav_msgs)
+    urdf
+    joint_limits_interface)
 
 add_message_files(
   DIRECTORY msg
@@ -28,7 +30,8 @@ include_directories(
 add_library(${PROJECT_NAME}
   src/diff_drive_controller.cpp
   src/odometry.cpp
-  src/speed_limiter.cpp)
+  src/speed_limiter.cpp
+  src/twist_limiter.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_generate_messages_cpp)
 
