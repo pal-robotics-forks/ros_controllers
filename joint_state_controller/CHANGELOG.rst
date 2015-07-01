@@ -2,8 +2,8 @@
 Changelog for package joint_state_controller
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.2 (2015-07-01)
+------------------
 * Add extra joints support:
   Allow to optionally specify a set of extra joints for state publishing that
   are not contained in the JointStateInterface associated to the controller.
