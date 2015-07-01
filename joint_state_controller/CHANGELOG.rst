@@ -2,6 +2,17 @@
 Changelog for package joint_state_controller
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add extra joints support:
+  Allow to optionally specify a set of extra joints for state publishing that
+  are not contained in the JointStateInterface associated to the controller.
+  The state of these joints can be specified via ROS parameters, and remains
+  constant over time.
+* Add test suite
+* Migrate to package format2
+* Contributors: Adolfo Rodriguez Tsouroukdissian
+
 0.2.1 (2015-03-19)
 ------------------
 
