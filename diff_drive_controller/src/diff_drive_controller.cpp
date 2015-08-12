@@ -433,7 +433,7 @@ namespace diff_drive_controller{
     init_ = false;
   }
 
-  void DiffDriveController::stopping(const ros::Time& time)
+  void DiffDriveController::stopping(const ros::Time& /*time*/)
   {
     brake();
   }

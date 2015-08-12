@@ -103,8 +103,8 @@ public:
     return true;
   }
 
-  void starting(const ros::Time& time) {commands_.resize(n_joints_, 0.0);}
-  void update(const ros::Time& time, const ros::Duration& period) 
+  void starting(const ros::Time& /*time*/) {commands_.resize(n_joints_, 0.0);}
+  void update(const ros::Time& /*time*/, const ros::Duration& /*period*/)
   {
     for(unsigned int i=0; i<n_joints_; i++)
     {  joints_[i].setCommand(commands_[i]);  }

@@ -85,8 +85,8 @@ public:
     return true;
   }
 
-  void starting(const ros::Time& time) {command_ = 0.0;}
-  void update(const ros::Time& time, const ros::Duration& period) {joint_.setCommand(command_);}
+  void starting(const ros::Time& /*time*/) {command_ = 0.0;}
+  void update(const ros::Time& /*time*/, const ros::Duration& /*period*/) {joint_.setCommand(command_);}
 
   hardware_interface::JointHandle joint_;
   double command_;
