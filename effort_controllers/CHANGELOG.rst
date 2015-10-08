@@ -2,6 +2,11 @@
 Changelog for package effort_controllers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Cherry picked group controllers
+* Contributors: Bence Magyar
+
 0.2.2 (2015-07-01)
 ------------------
 

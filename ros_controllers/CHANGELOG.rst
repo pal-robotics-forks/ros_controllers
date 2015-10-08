@@ -2,6 +2,9 @@
 Changelog for package ros_controllers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.2.2 (2015-07-01)
 ------------------
 

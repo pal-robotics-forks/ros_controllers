@@ -2,6 +2,11 @@
 Changelog for package joint_state_controller
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Address -Wunused-parameter warnings
+* Contributors: Adolfo Rodriguez Tsouroukdissian
+
 0.2.2 (2015-07-01)
 ------------------
 * Add extra joints support:
