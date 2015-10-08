@@ -2,8 +2,8 @@
 Changelog for package forward_command_controller
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.3 (2015-10-08)
+------------------
 * Address -Wunused-parameter warnings
 * Cherry picked group controllers
 * Contributors: Adolfo Rodriguez Tsouroukdissian, Bence Magyar
