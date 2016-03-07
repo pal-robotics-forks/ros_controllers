@@ -2,6 +2,9 @@
 Changelog for package velocity_controllers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.2.3 (2015-10-08)
 ------------------
 * Cherry picked group controllers

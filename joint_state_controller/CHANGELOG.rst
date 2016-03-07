@@ -2,6 +2,12 @@
 Changelog for package joint_state_controller
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Removed added temporary files
+* Fixed catkin issues
+* Contributors: Hilario Tome, hilariotome
+
 0.2.3 (2015-10-08)
 ------------------
 * Address -Wunused-parameter warnings
