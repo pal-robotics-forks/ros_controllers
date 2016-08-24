@@ -17,16 +17,16 @@ else()
 
   include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
 
-  add_library(${PROJECT_NAME}
-    src/imu_sensor_controller.cpp include/imu_sensor_controller/imu_sensor_controller.h)
-  target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
-
   # Declare catkin package
   catkin_package(
     CATKIN_DEPENDS controller_interface hardware_interface sensor_msgs realtime_tools
     INCLUDE_DIRS include
     LIBRARIES ${PROJECT_NAME}
     )
+
+  add_library(${PROJECT_NAME}
+    src/imu_sensor_controller.cpp include/imu_sensor_controller/imu_sensor_controller.h)
+  target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 
   # Install
   install(DIRECTORY include/${PROJECT_NAME}/

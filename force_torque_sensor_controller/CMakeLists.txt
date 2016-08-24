@@ -17,16 +17,16 @@ else()
 
   include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
 
-  add_library(${PROJECT_NAME}
-    src/force_torque_sensor_controller.cpp include/force_torque_sensor_controller/force_torque_sensor_controller.h)
-  target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
-
   # Declare catkin package
   catkin_package(
     CATKIN_DEPENDS controller_interface hardware_interface geometry_msgs realtime_tools
     INCLUDE_DIRS include
     LIBRARIES ${PROJECT_NAME}
     )
+
+  add_library(${PROJECT_NAME}
+    src/force_torque_sensor_controller.cpp include/force_torque_sensor_controller/force_torque_sensor_controller.h)
+  target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 
   # Install
   install(DIRECTORY include/${PROJECT_NAME}/

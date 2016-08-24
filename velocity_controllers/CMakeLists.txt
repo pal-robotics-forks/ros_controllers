@@ -21,13 +21,6 @@ else()
     realtime_tools
   )
 
-  include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
-  add_library(${PROJECT_NAME}
-    src/joint_velocity_controller.cpp 
-    include/velocity_controllers/joint_velocity_controller.h
-    src/joint_group_velocity_controller.cpp)
-  target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
-
   # Declare catkin package
   catkin_package(
     CATKIN_DEPENDS 
@@ -38,6 +31,13 @@ else()
     INCLUDE_DIRS include
     LIBRARIES ${PROJECT_NAME}
   )
+
+  include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
+  add_library(${PROJECT_NAME}
+    src/joint_velocity_controller.cpp 
+    include/velocity_controllers/joint_velocity_controller.h
+    src/joint_group_velocity_controller.cpp)
+  target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 
   # Install
   install(DIRECTORY include/${PROJECT_NAME}/
