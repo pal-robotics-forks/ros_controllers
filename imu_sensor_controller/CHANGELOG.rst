@@ -2,6 +2,11 @@
 Changelog for package imu_sensor_controller
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* fixes #14221
+* Contributors: Jordi Pages
+
 0.2.4 (2016-03-07)
 ------------------
 

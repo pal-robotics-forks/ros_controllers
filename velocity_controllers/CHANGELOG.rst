@@ -2,6 +2,11 @@
 Changelog for package velocity_controllers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* fixes #14221
+* Contributors: Jordi Pages
+
 0.2.4 (2016-03-07)
 ------------------
 
