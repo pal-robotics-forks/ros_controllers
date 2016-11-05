@@ -22,8 +22,14 @@ namespace joint_torque_sensor_state_controller
       return false;
     }
 
+    std::string output_topic;
+    if (!controller_nh.getParam("output_topic", output_topic)){
+      ROS_ERROR("Parameter 'output_topic'' not specified");
+      return false;
+    }
+
     // realtime publisher
-    realtime_pub_.reset(new realtime_tools::RealtimePublisher<sensor_msgs::JointState>(root_nh, "joint_torque_sensor_states", 4));
+    realtime_pub_.reset(new realtime_tools::RealtimePublisher<sensor_msgs::JointState>(root_nh, output_topic, 4));
 
     // get joints and allocate message
     for (unsigned i=0; i<num_hw_joints_; i++){
@@ -59,7 +65,7 @@ namespace joint_torque_sensor_state_controller
         // - leave unchanged extra joints, which have static values, i.e. indices from num_hw_joints_ onwards
         realtime_pub_->msg_.header.stamp = time;
         for (unsigned i=0; i<num_hw_joints_; i++){
-          realtime_pub_->msg_.position[i] = joint_state_[i].getPosition();
+          realtime_pub_->msg_.position[i] = joint_state_[i].getAbsolutePosition();
           realtime_pub_->msg_.velocity[i] = joint_state_[i].getVelocity();
           realtime_pub_->msg_.effort[i] = joint_state_[i].getTorqueSensor();
         }
