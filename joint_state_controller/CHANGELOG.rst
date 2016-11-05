@@ -2,6 +2,9 @@
 Changelog for package joint_state_controller
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.2.5 (2016-10-13)
+------------------
+
 0.2.4 (2016-03-07)
 ------------------
 * Removed added temporary files
