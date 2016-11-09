@@ -2,8 +2,8 @@
 Changelog for package joint_torque_sensor_state_controller
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.6 (2016-11-09)
+------------------
 * Updated changelogs
 * Added new changelogs
 * Added actuator mode state controller
