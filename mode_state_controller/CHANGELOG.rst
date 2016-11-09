@@ -4,6 +4,11 @@ Changelog for package mode_state_controller
 
 Forthcoming
 -----------
+* Updated changelogs
+* Added new changelogs
+* Added actuator mode state controller
+* Contributors: Hilario Tome
+
 * Added new changelogs
 * Added actuator mode state controller
 * Contributors: Hilario Tome

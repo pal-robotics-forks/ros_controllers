@@ -4,6 +4,11 @@ Changelog for package ros_controllers
 
 Forthcoming
 -----------
+* Updated changelogs
+* Merge branch 'dubnium-devel' of gitlab:control/ros_controllers into dubnium-devel
+* Initial implementation of joint torque sensor controller and temperature controller
+* Contributors: Hilario Tome
+
 * Merge branch 'dubnium-devel' of gitlab:control/ros_controllers into dubnium-devel
 * Initial implementation of joint torque sensor controller and temperature controller
 * Contributors: Hilario Tome

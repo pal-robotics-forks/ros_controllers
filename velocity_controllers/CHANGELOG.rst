@@ -4,6 +4,8 @@ Changelog for package velocity_controllers
 
 Forthcoming
 -----------
+* Updated changelogs
+* Contributors: Hilario Tome
 
 0.2.5 (2016-10-13)
 ------------------

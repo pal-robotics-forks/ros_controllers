@@ -4,6 +4,8 @@ Changelog for package forward_command_controller
 
 Forthcoming
 -----------
+* Updated changelogs
+* Contributors: Hilario Tome
 
 0.2.5 (2016-10-13)
 ------------------
