@@ -4,6 +4,12 @@ Changelog for package temperature_sensor_controller
 
 Forthcoming
 -----------
+* Added new changelogs
+* Added actuator mode state controller
+* Added temperature monitor
+* Initial implementation of joint torque sensor controller and temperature controller
+* Contributors: Hilario Tome
+
 * Added actuator mode state controller
 * Added temperature monitor
 * Initial implementation of joint torque sensor controller and temperature controller
