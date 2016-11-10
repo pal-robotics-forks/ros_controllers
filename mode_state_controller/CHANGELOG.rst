@@ -16,6 +16,11 @@ Changelog for package mode_state_controller
 * Added actuator mode state controller
 * Contributors: Hilario Tome
 
+Forthcoming
+-----------
+* Add enum to ModeState, fix default value for message
+* Contributors: Victor Lopez
+
 0.9.2 (2015-05-04)
 ------------------
 
