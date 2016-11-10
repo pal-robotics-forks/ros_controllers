@@ -29,7 +29,7 @@ namespace mode_state_controller
     for (unsigned i=0; i<num_hw_joints_; i++){
       actuator_state_.push_back(hw->getHandle(actuator_names[i]));
       realtime_pub_->msg_.name.push_back(actuator_names[i]);
-      realtime_pub_->msg_.mode.push_back(0.0);
+      realtime_pub_->msg_.mode.push_back(mode_state_controller::ModeState::NOMODE);
     }
 
     return true;
