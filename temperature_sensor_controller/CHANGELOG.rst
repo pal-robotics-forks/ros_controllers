@@ -22,8 +22,8 @@ Changelog for package temperature_sensor_controller
 * Initial implementation of joint torque sensor controller and temperature controller
 * Contributors: Hilario Tome
 
-Forthcoming
------------
+0.2.7 (2016-11-10)
+------------------
 
 0.9.2 (2015-05-04)
 ------------------
