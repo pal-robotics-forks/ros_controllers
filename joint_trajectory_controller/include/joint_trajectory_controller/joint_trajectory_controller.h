@@ -66,6 +66,7 @@
 #include <controller_interface/controller.h>
 #include <hardware_interface/joint_command_interface.h>
 #include <hardware_interface/internal/demangle_symbol.h>
+#include <hardware_interface/joint_mode_interface.h>
 
 // Project
 #include <trajectory_interface/trajectory_interface.h>
@@ -122,11 +123,66 @@ namespace joint_trajectory_controller
  * \p hardware_interface::EffortJointInterface are supported out-of-the-box.
  */
 template <class SegmentImpl, class HardwareInterface>
-class JointTrajectoryController : public controller_interface::Controller<HardwareInterface>
+class JointTrajectoryController : public controller_interface::ControllerBase
 {
 public:
 
   JointTrajectoryController();
+
+  bool initRequest(hardware_interface::RobotHW* robot_hw,
+                   ros::NodeHandle&             root_nh,
+                   ros::NodeHandle &            controller_nh,
+                   std::set<std::string>&       claimed_resources){
+
+    controller_nh.getParam("check_mode", check_mode_);
+    if(check_mode_){
+      ROS_ERROR_STREAM("Configured to use checkmode");
+    }
+    else{
+      ROS_ERROR_STREAM("NOT Configured to use checkmode");
+    }
+
+    HardwareInterface *joint_iface =  robot_hw->get<HardwareInterface>();
+    if(!joint_iface){
+      ROS_ERROR_STREAM("error retreving hardware interface: "<<this->getHardwareInterfaceType());
+      return false;
+    }
+
+    joint_iface->clearClaims();
+    bool init_succes = init(joint_iface, root_nh, controller_nh);
+    claimed_resources = joint_iface->getClaims();
+    joint_iface->clearClaims();
+
+    if(!init_succes){
+      return false;
+    }
+
+    if(check_mode_){
+
+      hardware_interface::JointModeInterface *actuator_mode_iface =  robot_hw->get<hardware_interface::JointModeInterface>();
+      if(!actuator_mode_iface){
+        ROS_ERROR_STREAM("error retreving hardware interface: "<<hardware_interface::internal::demangledTypeName<hardware_interface::JointModeHandle>());
+      }
+
+      for (unsigned int i = 0; i < actuator_names_.size(); ++i){
+        // Initial actuator modes
+        // Actuator handle
+        try {
+          actuator_modes_.push_back(actuator_mode_iface->getHandle(actuator_names_[i]));
+        }
+        catch (...)
+        {
+          ROS_ERROR_STREAM_NAMED(name_, "Could not find actuator '" << actuator_names_[i] << "' in '" <<
+                                 this->getHardwareInterfaceType() << "'.");
+          return false;
+        }
+      }
+    }
+
+    state_ = INITIALIZED;
+
+    return true;
+  }
 
   /** \name Non Real-Time Safe Functions
    *\{*/
@@ -144,7 +200,16 @@ public:
   void update(const ros::Time& time, const ros::Duration& period);
   /*\}*/
 
+  virtual std::string getHardwareInterfaceType() const {
+    return hardware_interface::internal::demangledTypeName<HardwareInterface>();
+  }
+
 private:
+
+  bool check_mode_;
+  bool first_iteration_;
+
+  bool jointModeFinished();
 
   struct TimeData
   {
@@ -175,8 +240,10 @@ private:
   bool                                         verbose_;            ///< Hard coded verbose flag to help in debugging
   std::string                                  name_;               ///< Controller name.
   std::vector<hardware_interface::JointHandle> joints_;             ///< Handles to controlled joints.
+  std::vector<hardware_interface::JointModeHandle> actuator_modes_;     ///< Handles to controlled actuator modes.
   std::vector<bool>                            angle_wraparound_;   ///< Whether controlled joints wrap around or not.
   std::vector<std::string>                     joint_names_;        ///< Controlled joint names.
+  std::vector<std::string>                     actuator_names_;        ///< Controlled joint names.
   SegmentTolerances<Scalar>                    default_tolerances_; ///< Default trajectory segment tolerances.
   HwIfaceAdapter                               hw_iface_adapter_;   ///< Adapts desired trajectory state to HW interface.
 

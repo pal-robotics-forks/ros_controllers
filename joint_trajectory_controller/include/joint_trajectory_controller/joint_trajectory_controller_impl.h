@@ -31,6 +31,7 @@
 #ifndef JOINT_TRAJECTORY_CONTROLLER_JOINT_TRAJECTORY_CONTROLLER_IMP_H
 #define JOINT_TRAJECTORY_CONTROLLER_JOINT_TRAJECTORY_CONTROLLER_IMP_H
 
+#include <hardware_interface/joint_mode_interface.h>
 
 namespace joint_trajectory_controller
 {
@@ -87,7 +88,7 @@ boost::shared_ptr<urdf::Model> getUrdf(const ros::NodeHandle& nh, const std::str
     if (!urdf->initString(urdf_str))
     {
       ROS_ERROR_STREAM("Failed to parse URDF contained in '" << param_name << "' parameter (namespace: " <<
-        nh.getNamespace() << ").");
+                       nh.getNamespace() << ").");
       return boost::shared_ptr<urdf::Model>();
     }
   }
@@ -189,7 +190,7 @@ checkPathTolerances(const typename Segment::State& state_error,
   if (!checkStateTolerance(state_error, tolerances.state_tolerance))
   {
     rt_segment_goal->preallocated_result_->error_code =
-    control_msgs::FollowJointTrajectoryResult::PATH_TOLERANCE_VIOLATED;
+        control_msgs::FollowJointTrajectoryResult::PATH_TOLERANCE_VIOLATED;
     rt_segment_goal->setAborted(rt_segment_goal->preallocated_result_);
     rt_active_goal_.reset();
   }
@@ -236,7 +237,9 @@ checkGoalTolerances(const typename Segment::State& state_error,
 template <class SegmentImpl, class HardwareInterface>
 JointTrajectoryController<SegmentImpl, HardwareInterface>::
 JointTrajectoryController()
-  : verbose_(false), // Set to true during debugging
+  : check_mode_(false),
+    first_iteration_(true),
+    verbose_(false), // Set to true during debugging
     hold_trajectory_ptr_(new Trajectory)
 {}
 
@@ -282,6 +285,12 @@ bool JointTrajectoryController<SegmentImpl, HardwareInterface>::init(HardwareInt
   if (joint_names_.empty()) {return false;}
   const unsigned int n_joints = joint_names_.size();
 
+  if(check_mode_){
+    // List of actuator names
+    actuator_names_ = getStrings(controller_nh_, "actuators");
+    if (actuator_names_.empty()) {return false;}
+  }
+
   // URDF joints
   boost::shared_ptr<urdf::Model> urdf = getUrdf(root_nh, "robot_description");
   if (!urdf) {return false;}
@@ -300,7 +309,7 @@ bool JointTrajectoryController<SegmentImpl, HardwareInterface>::init(HardwareInt
     catch (...)
     {
       ROS_ERROR_STREAM_NAMED(name_, "Could not find joint '" << joint_names_[i] << "' in '" <<
-                                    this->getHardwareInterfaceType() << "'.");
+                             this->getHardwareInterfaceType() << "'.");
       return false;
     }
 
@@ -309,7 +318,7 @@ bool JointTrajectoryController<SegmentImpl, HardwareInterface>::init(HardwareInt
     const std::string not_if = angle_wraparound_[i] ? "" : "non-";
 
     ROS_DEBUG_STREAM_NAMED(name_, "Found " << not_if << "continuous joint '" << joint_names_[i] << "' in '" <<
-                                  this->getHardwareInterfaceType() << "'.");
+                           this->getHardwareInterfaceType() << "'.");
   }
 
   assert(joints_.size() == angle_wraparound_.size());
@@ -370,79 +379,105 @@ bool JointTrajectoryController<SegmentImpl, HardwareInterface>::init(HardwareInt
 }
 
 template <class SegmentImpl, class HardwareInterface>
+bool JointTrajectoryController<SegmentImpl, HardwareInterface>::jointModeFinished(){
+
+  bool ready = true;
+  for(size_t i=0; i<actuator_modes_.size(); ++i){
+    bool positionMode = false;
+    if(actuator_modes_[i].getMode() == hardware_interface::MODE_POSITION){
+      positionMode = true;
+    }
+    ready = ready && positionMode;
+  }
+
+  return ready;
+}
+
+template <class SegmentImpl, class HardwareInterface>
 void JointTrajectoryController<SegmentImpl, HardwareInterface>::
 update(const ros::Time& time, const ros::Duration& period)
 {
-  // Get currently followed trajectory
-  TrajectoryPtr curr_traj_ptr;
-  curr_trajectory_box_.get(curr_traj_ptr);
-  Trajectory& curr_traj = *curr_traj_ptr;
-
-  // Update time data
-  TimeData time_data;
-  time_data.time   = time;                                     // Cache current time
-  time_data.period = period;                                   // Cache current control period
-  time_data.uptime = time_data_.readFromRT()->uptime + period; // Update controller uptime
-  time_data_.writeFromNonRT(time_data); // TODO: Grrr, we need a lock-free data structure here!
-
-  // NOTE: It is very important to execute the two above code blocks in the specified sequence: first get current
-  // trajectory, then update time data. Hopefully the following paragraph sheds a bit of light on the rationale.
-  // The non-rt thread responsible for processing new commands enqueues trajectories that can start at the _next_
-  // control cycle (eg. zero start time) or later (eg. when we explicitly request a start time in the future).
-  // If we reverse the order of the two blocks above, and update the time data first; it's possible that by the time we
-  // fetch the currently followed trajectory, it has been updated by the non-rt thread with something that starts in the
-  // next control cycle, leaving the current cycle without a valid trajectory.
-
-  // Update desired state: sample trajectory at current time
-  typename Trajectory::const_iterator segment_it = sample(curr_traj, time_data.uptime.toSec(), desired_state_);
-  if (curr_traj.end() == segment_it)
-  {
-    // Non-realtime safe, but should never happen under normal operation
-    ROS_ERROR_NAMED(name_,
-                    "Unexpected error: No trajectory defined at current time. Please contact the package maintainer.");
-    return;
+  if(check_mode_ && !jointModeFinished()){
+    ROS_INFO_STREAM_THROTTLE(0.05, "Waiting for joint mode switch to finish");
   }
+  else{
 
-  // Update current state and state error
-  for (unsigned int i = 0; i < joints_.size(); ++i)
-  {
-    current_state_.position[i] = joints_[i].getPosition();
-    current_state_.velocity[i] = joints_[i].getVelocity();
-    // There's no acceleration data available in a joint handle
-
-    state_error_.position[i] = desired_state_.position[i] - current_state_.position[i];
-    state_error_.velocity[i] = desired_state_.velocity[i] - current_state_.velocity[i];
-    state_error_.acceleration[i] = 0.0;
-  }
-
-  // Check tolerances if segment corresponds to currently active action goal
-  const RealtimeGoalHandlePtr rt_segment_goal = segment_it->getGoalHandle();
-  if (rt_segment_goal && rt_segment_goal == rt_active_goal_)
-  {
-    // Check tolerances
-    if (time_data.uptime.toSec() < segment_it->endTime())
-    {
-      // Currently executing a segment: check path tolerances
-      checkPathTolerances(state_error_,
-                          *segment_it);
+    if(check_mode_ && first_iteration_){
+      starting(time);
+      first_iteration_ = false;
     }
-    else if (segment_it == --curr_traj.end())
+
+    // Get currently followed trajectory
+    TrajectoryPtr curr_traj_ptr;
+    curr_trajectory_box_.get(curr_traj_ptr);
+    Trajectory& curr_traj = *curr_traj_ptr;
+
+    // Update time data
+    TimeData time_data;
+    time_data.time   = time;                                     // Cache current time
+    time_data.period = period;                                   // Cache current control period
+    time_data.uptime = time_data_.readFromRT()->uptime + period; // Update controller uptime
+    time_data_.writeFromNonRT(time_data); // TODO: Grrr, we need a lock-free data structure here!
+
+    // NOTE: It is very important to execute the two above code blocks in the specified sequence: first get current
+    // trajectory, then update time data. Hopefully the following paragraph sheds a bit of light on the rationale.
+    // The non-rt thread responsible for processing new commands enqueues trajectories that can start at the _next_
+    // control cycle (eg. zero start time) or later (eg. when we explicitly request a start time in the future).
+    // If we reverse the order of the two blocks above, and update the time data first; it's possible that by the time we
+    // fetch the currently followed trajectory, it has been updated by the non-rt thread with something that starts in the
+    // next control cycle, leaving the current cycle without a valid trajectory.
+
+    // Update desired state: sample trajectory at current time
+    typename Trajectory::const_iterator segment_it = sample(curr_traj, time_data.uptime.toSec(), desired_state_);
+    if (curr_traj.end() == segment_it)
     {
-      if (verbose_)
-        ROS_DEBUG_STREAM_THROTTLE_NAMED(1,name_,"Finished executing last segement, checking goal tolerances");
-
-      // Finished executing the LAST segment: check goal tolerances
-      checkGoalTolerances(state_error_,
-                           *segment_it);
+      // Non-realtime safe, but should never happen under normal operation
+      ROS_ERROR_NAMED(name_,
+                      "Unexpected error: No trajectory defined at current time. Please contact the package maintainer.");
+      return;
     }
+
+    // Update current state and state error
+    for (unsigned int i = 0; i < joints_.size(); ++i)
+    {
+      current_state_.position[i] = joints_[i].getPosition();
+      current_state_.velocity[i] = joints_[i].getVelocity();
+      // There's no acceleration data available in a joint handle
+
+      state_error_.position[i] = desired_state_.position[i] - current_state_.position[i];
+      state_error_.velocity[i] = desired_state_.velocity[i] - current_state_.velocity[i];
+      state_error_.acceleration[i] = 0.0;
+    }
+
+    // Check tolerances if segment corresponds to currently active action goal
+    const RealtimeGoalHandlePtr rt_segment_goal = segment_it->getGoalHandle();
+    if (rt_segment_goal && rt_segment_goal == rt_active_goal_)
+    {
+      // Check tolerances
+      if (time_data.uptime.toSec() < segment_it->endTime())
+      {
+        // Currently executing a segment: check path tolerances
+        checkPathTolerances(state_error_,
+                            *segment_it);
+      }
+      else if (segment_it == --curr_traj.end())
+      {
+        if (verbose_)
+          ROS_DEBUG_STREAM_THROTTLE_NAMED(1,name_,"Finished executing last segement, checking goal tolerances");
+
+        // Finished executing the LAST segment: check goal tolerances
+        checkGoalTolerances(state_error_,
+                            *segment_it);
+      }
+    }
+
+    // Hardware interface adapter: Generate and send commands
+    hw_iface_adapter_.updateCommand(time_data.uptime, time_data.period,
+                                    desired_state_, state_error_);
+
+    // Publish state
+    publishState(time_data.uptime);
   }
-
-  // Hardware interface adapter: Generate and send commands
-  hw_iface_adapter_.updateCommand(time_data.uptime, time_data.period,
-                                  desired_state_, state_error_);
-
-  // Publish state
-  publishState(time_data.uptime);
 }
 
 template <class SegmentImpl, class HardwareInterface>

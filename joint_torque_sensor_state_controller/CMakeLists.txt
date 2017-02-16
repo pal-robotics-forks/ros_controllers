@@ -16,6 +16,9 @@ include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
 add_library(${PROJECT_NAME} src/joint_torque_sensor_state_controller.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 
+add_executable(joint_state_relay_without_nans src/joint_state_relay_without_nans.cpp)
+target_link_libraries(joint_state_relay_without_nans ${catkin_LIBRARIES})
+
 # if(CATKIN_ENABLE_TESTING)
 #   find_package(rostest REQUIRED)
 #
