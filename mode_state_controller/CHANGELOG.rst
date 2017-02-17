@@ -23,6 +23,8 @@ Changelog for package mode_state_controller
 
 Forthcoming
 -----------
+* updated changelog
+* Contributors: Hilario Tome
 
 0.9.2 (2015-05-04)
 ------------------

@@ -4,6 +4,8 @@ Changelog for package rqt_joint_trajectory_controller
 
 Forthcoming
 -----------
+* updated changelog
+* Contributors: Hilario Tome
 
 0.2.7 (2016-11-10)
 ------------------

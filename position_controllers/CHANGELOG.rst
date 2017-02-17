@@ -4,6 +4,8 @@ Changelog for package position_controllers
 
 Forthcoming
 -----------
+* updated changelog
+* Contributors: Hilario Tome
 
 0.2.7 (2016-11-10)
 ------------------

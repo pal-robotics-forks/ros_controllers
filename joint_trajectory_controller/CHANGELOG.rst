@@ -4,6 +4,11 @@ Changelog for package joint_trajectory_controller
 
 Forthcoming
 -----------
+* updated changelog
+* fixed discontinuity in joint trajectory controller
+* first draft of safe joint mode switch for joint_trajectory_controller, there is a bug do to the fact that all actuators don't swith at the same time
+* Contributors: Hilario Tome
+
 * fixed discontinuity in joint trajectory controller
 * first draft of safe joint mode switch for joint_trajectory_controller, there is a bug do to the fact that all actuators don't swith at the same time
 * Contributors: Hilario Tome
