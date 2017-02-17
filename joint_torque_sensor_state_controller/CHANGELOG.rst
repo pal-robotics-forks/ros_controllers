@@ -25,6 +25,11 @@ Changelog for package joint_torque_sensor_state_controller
 0.2.7 (2016-11-10)
 ------------------
 
+Forthcoming
+-----------
+* first draft of safe joint mode switch for joint_trajectory_controller, there is a bug do to the fact that all actuators don't swith at the same time
+* Contributors: Hilario Tome
+
 0.9.2 (2015-05-04)
 ------------------
 
