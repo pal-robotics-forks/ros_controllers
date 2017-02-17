@@ -135,12 +135,6 @@ public:
                    std::set<std::string>&       claimed_resources){
 
     controller_nh.getParam("check_mode", check_mode_);
-    if(check_mode_){
-      ROS_ERROR_STREAM("Configured to use checkmode");
-    }
-    else{
-      ROS_ERROR_STREAM("NOT Configured to use checkmode");
-    }
 
     HardwareInterface *joint_iface =  robot_hw->get<HardwareInterface>();
     if(!joint_iface){

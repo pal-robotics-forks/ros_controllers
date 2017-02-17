@@ -31,8 +31,6 @@
 #ifndef JOINT_TRAJECTORY_CONTROLLER_JOINT_TRAJECTORY_CONTROLLER_IMP_H
 #define JOINT_TRAJECTORY_CONTROLLER_JOINT_TRAJECTORY_CONTROLLER_IMP_H
 
-#include <hardware_interface/joint_mode_interface.h>
-
 namespace joint_trajectory_controller
 {
 
@@ -386,6 +384,10 @@ bool JointTrajectoryController<SegmentImpl, HardwareInterface>::jointModeFinishe
     bool positionMode = false;
     if(actuator_modes_[i].getMode() == hardware_interface::MODE_POSITION){
       positionMode = true;
+    }
+    else{
+      double actual_position = joints_[i].getPosition();
+      joints_[i].setCommand(actual_position);
     }
     ready = ready && positionMode;
   }
