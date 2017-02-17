@@ -2,8 +2,8 @@
 Changelog for package imu_sensor_controller
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.8 (2017-02-17)
+------------------
 * updated changelog
 * Contributors: Hilario Tome
 

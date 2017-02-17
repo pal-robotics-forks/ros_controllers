@@ -25,8 +25,8 @@ Changelog for package temperature_sensor_controller
 0.2.7 (2016-11-10)
 ------------------
 
-Forthcoming
------------
+0.2.8 (2017-02-17)
+------------------
 * updated changelog
 * Contributors: Hilario Tome
 

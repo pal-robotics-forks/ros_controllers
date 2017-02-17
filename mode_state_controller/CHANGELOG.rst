@@ -21,8 +21,8 @@ Changelog for package mode_state_controller
 * Add enum to ModeState, fix default value for message
 * Contributors: Victor Lopez
 
-Forthcoming
------------
+0.2.8 (2017-02-17)
+------------------
 * updated changelog
 * Contributors: Hilario Tome
 
