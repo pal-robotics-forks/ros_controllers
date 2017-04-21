@@ -90,6 +90,7 @@ public:
   virtual void starting(const ros::Time& time);
   virtual void update(const ros::Time& time, const ros::Duration& /*period*/);
   virtual void stopping(const ros::Time& /*time*/);
+  bool parseJointOffsets(ros::NodeHandle &controller_nh);
 
 private:
 
@@ -100,6 +101,10 @@ private:
   unsigned int num_hw_joints_; ///< Number of joints present in the JointStateInterface, excluding extra joints
 
   void addExtraJoints(const ros::NodeHandle& nh, sensor_msgs::JointState& msg);
+
+  bool use_relative_for_nans_;
+  std::map<std::string, double> joint_offsets_;
+  std::vector<std::string> joint_names_;
 };
 
 }
