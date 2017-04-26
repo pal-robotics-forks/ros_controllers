@@ -132,7 +132,7 @@ public:
   bool initRequest(hardware_interface::RobotHW* robot_hw,
                    ros::NodeHandle&             root_nh,
                    ros::NodeHandle &            controller_nh,
-                   std::set<std::string>&       claimed_resources){
+                   ClaimedResources&       claimed_resources){
 
     controller_nh.getParam("check_mode", check_mode_);
 
@@ -144,7 +144,8 @@ public:
 
     joint_iface->clearClaims();
     bool init_succes = init(joint_iface, root_nh, controller_nh);
-    claimed_resources = joint_iface->getClaims();
+    claimed_resources.push_back(hardware_interface::InterfaceResources(hardware_interface::internal::demangledTypeName<hardware_interface::PositionJointInterface>(),
+                                                                       joint_iface->getClaims()));
     joint_iface->clearClaims();
 
     if(!init_succes){
