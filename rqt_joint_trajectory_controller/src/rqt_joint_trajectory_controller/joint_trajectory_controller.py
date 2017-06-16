@@ -272,8 +272,19 @@ class JointTrajectoryController(Plugin):
     def _load_jtc(self):
         # Initialize joint data corresponding to selected controller
         running_jtc = self._running_jtc_info()
-        self._joint_names = next(x.resources for x in running_jtc
-                                 if x.name == self._jtc_name)
+        resources = None
+        HW_IF_TYPE = "hardware_interface::PositionJointInterface"
+        for x in running_jtc:
+            if x.name == self._jtc_name:
+                for c_r in x.claimed_resources:
+                    if c_r.hardware_interface == HW_IF_TYPE:
+                        resources = c_r.resources
+        if not resources:
+            rospy.logerr("Could not find a hardware interface of type {} for {}".
+                         format(HW_IF_TYPE, self._jtc_name))
+            return
+
+        self._joint_names = resources
         for name in self._joint_names:
             self._joint_pos[name] = {}
 
