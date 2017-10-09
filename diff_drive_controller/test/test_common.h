@@ -35,7 +35,7 @@
 
 #include <geometry_msgs/Twist.h>
 #include <nav_msgs/Odometry.h>
-#include <diff_drive_controller/WheelData.h>
+#include <diff_drive_controller/WheelDataStamped.h>
 #include <tf/tf.h>
 
 #include <std_srvs/Empty.h>
@@ -69,7 +69,7 @@ public:
   }
 
   nav_msgs::Odometry getLastOdom(){ return last_odom; }
-  diff_drive_controller::WheelData getLastWheelData(){ return last_wheel_data; }
+  diff_drive_controller::WheelDataStamped getLastWheelData(){ return last_wheel_data; }
   void publish(geometry_msgs::Twist cmd_vel){ cmd_pub.publish(cmd_vel); }
   bool isControllerAlive(){ return (odom_sub.getNumPublishers() > 0) && (cmd_pub.getNumSubscribers() > 0); }
 
@@ -82,7 +82,7 @@ private:
   ros::Subscriber odom_sub;
   ros::Subscriber wheel_data_sub;
   nav_msgs::Odometry last_odom;
-  diff_drive_controller::WheelData last_wheel_data;
+  diff_drive_controller::WheelDataStamped last_wheel_data;
 
   ros::ServiceClient start_srv;
   ros::ServiceClient stop_srv;
@@ -97,7 +97,7 @@ private:
     last_odom = *odom;
   }
 
-  void wheelDataCallback(const diff_drive_controller::WheelDataConstPtr& wheel_data)
+  void wheelDataCallback(const diff_drive_controller::WheelDataStampedConstPtr& wheel_data)
   {
     ROS_INFO_STREAM("Wheel data callback reveived");
 
