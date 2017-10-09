@@ -12,7 +12,9 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
   DIRECTORY msg
   FILES
-    WheelData.msg)
+    WheelData.msg
+    WheelDataStamped.msg
+)
 
 generate_messages(DEPENDENCIES std_msgs)
 
