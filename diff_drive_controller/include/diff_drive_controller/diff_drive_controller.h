@@ -42,7 +42,7 @@
 
 #include <nav_msgs/Odometry.h>
 #include <geometry_msgs/TwistStamped.h>
-#include <diff_drive_controller/WheelData.h>
+#include <diff_drive_controller/WheelDataStamped.h>
 #include <tf/tfMessage.h>
 
 #include <realtime_tools/realtime_buffer.h>
@@ -131,7 +131,7 @@ namespace diff_drive_controller
     Odometry odometry_;
 
     /// Wheel data:
-    boost::shared_ptr<realtime_tools::RealtimePublisher<WheelData> > wheel_data_pub_;
+    boost::shared_ptr<realtime_tools::RealtimePublisher<WheelDataStamped> > wheel_data_pub_;
 
     /// Wheel separation, wrt the midpoint of the wheel width:
     double wheel_separation_;
