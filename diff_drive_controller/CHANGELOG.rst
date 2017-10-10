@@ -15,6 +15,23 @@ Changelog for package diff_drive_controller
 * Updated changelogs
 * Contributors: Hilario Tome
 
+Forthcoming
+-----------
+* update test wheel_data to new wheel_data_stamped
+* fix warning: comparison between signed and unsigned
+* replace msg WheelData -> WheelDataStamped
+* add msg WheelDataStamped.msg
+* Allow multiple Tiagos on a single Gazebo
+* 0.2.8
+* Updated changelog
+* updated changelog
+* 0.2.7
+* Updated changelog
+* 0.2.6
+* Updated changelog
+* Updated changelogs
+* Contributors: Hilario Tome, Jeremie Deray, davidfernandez
+
 0.2.5 (2016-10-13)
 ------------------
 

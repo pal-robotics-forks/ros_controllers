@@ -54,6 +54,22 @@ Changelog for package temperature_sensor_controller
 0.7.1 (2014-03-31)
 ------------------
 
+Forthcoming
+-----------
+* 0.2.8
+* Updated changelog
+* updated changelog
+* 0.2.7
+* Updated changelog
+* 0.2.6
+* Updated changelog
+* Updated changelogs
+* Added new changelogs
+* Added actuator mode state controller
+* Added temperature monitor
+* Initial implementation of joint torque sensor controller and temperature controller
+* Contributors: Hilario Tome
+
 0.6.0 (2014-02-05)
 ------------------
 

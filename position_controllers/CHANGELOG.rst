@@ -15,6 +15,18 @@ Changelog for package position_controllers
 * Updated changelogs
 * Contributors: Hilario Tome
 
+Forthcoming
+-----------
+* 0.2.8
+* Updated changelog
+* updated changelog
+* 0.2.7
+* Updated changelog
+* 0.2.6
+* Updated changelog
+* Updated changelogs
+* Contributors: Hilario Tome
+
 0.2.5 (2016-10-13)
 ------------------
 
