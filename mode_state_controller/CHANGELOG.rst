@@ -65,8 +65,8 @@ Changelog for package mode_state_controller
 * Added actuator mode state controller
 * Contributors: Hilario Tome, Victor Lopez
 
-Forthcoming
------------
+0.3.0 (2017-10-10)
+------------------
 
 0.6.0 (2014-02-05)
 ------------------

@@ -21,8 +21,8 @@ Changelog for package joint_trajectory_controller
 * Updated changelogs
 * Contributors: Hilario Tome
 
-Forthcoming
------------
+0.3.0 (2017-10-10)
+------------------
 
 0.2.9 (2017-10-10)
 ------------------
