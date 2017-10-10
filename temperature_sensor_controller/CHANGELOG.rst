@@ -54,8 +54,8 @@ Changelog for package temperature_sensor_controller
 0.7.1 (2014-03-31)
 ------------------
 
-Forthcoming
------------
+0.2.9 (2017-10-10)
+------------------
 * 0.2.8
 * Updated changelog
 * updated changelog

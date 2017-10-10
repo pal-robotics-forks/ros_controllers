@@ -15,8 +15,8 @@ Changelog for package joint_state_controller
 * Updated changelogs
 * Contributors: Hilario Tome
 
-Forthcoming
------------
+0.2.9 (2017-10-10)
+------------------
 * 0.2.8
 * Updated changelog
 * updated changelog
