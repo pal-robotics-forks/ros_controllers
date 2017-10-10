@@ -15,6 +15,9 @@ Changelog for package force_torque_sensor_controller
 * Updated changelogs
 * Contributors: Hilario Tome
 
+Forthcoming
+-----------
+
 0.2.9 (2017-10-10)
 ------------------
 * 0.2.8
