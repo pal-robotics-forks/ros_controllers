@@ -15,6 +15,21 @@ Changelog for package rqt_joint_trajectory_controller
 * Updated changelogs
 * Contributors: Hilario Tome
 
+0.3.0 (2017-10-10)
+------------------
+
+0.2.9 (2017-10-10)
+------------------
+* 0.2.8
+* Updated changelog
+* updated changelog
+* 0.2.7
+* Updated changelog
+* 0.2.6
+* Updated changelog
+* Updated changelogs
+* Contributors: Hilario Tome
+
 0.2.5 (2016-10-13)
 ------------------
 

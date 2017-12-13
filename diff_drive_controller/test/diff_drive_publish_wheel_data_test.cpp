@@ -50,16 +50,16 @@ TEST_F(DiffDriveControllerTest, testActualReferenceVelocity)
   // wait for a while
   ros::Duration(1.0).sleep();
 
-  const diff_drive_controller::WheelData wheel_data = getLastWheelData();
+  const diff_drive_controller::WheelDataStamped wheel_data = getLastWheelData();
 
-  for (size_t i = 0; i < wheel_data.left_wheel_joint_actual_velocity.size(); ++i)
+  for (size_t i = 0; i < wheel_data.data.left_wheel_joint_actual_velocity.size(); ++i)
   {
-    EXPECT_NEAR(wheel_data.left_wheel_joint_actual_velocity[i], wheel_data.left_wheel_joint_reference_velocity[i], WHEEL_VELOCITY_TOLERANCE);
+    EXPECT_NEAR(wheel_data.data.left_wheel_joint_actual_velocity[i], wheel_data.data.left_wheel_joint_reference_velocity[i], WHEEL_VELOCITY_TOLERANCE);
   }
 
-  for (size_t i = 0; i < wheel_data.right_wheel_joint_actual_velocity.size(); ++i)
+  for (size_t i = 0; i < wheel_data.data.right_wheel_joint_actual_velocity.size(); ++i)
   {
-    EXPECT_NEAR(wheel_data.right_wheel_joint_actual_velocity[i], wheel_data.right_wheel_joint_reference_velocity[i], WHEEL_VELOCITY_TOLERANCE);
+    EXPECT_NEAR(wheel_data.data.right_wheel_joint_actual_velocity[i], wheel_data.data.right_wheel_joint_reference_velocity[i], WHEEL_VELOCITY_TOLERANCE);
   }
 
   cmd_vel.linear.x = 0.0;

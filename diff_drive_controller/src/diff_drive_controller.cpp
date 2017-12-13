@@ -252,28 +252,31 @@ namespace diff_drive_controller{
     cmd_vel_pub_.reset(new realtime_tools::RealtimePublisher<geometry_msgs::TwistStamped>(controller_nh, "cmd_vel_out", 100));
 
     // Wheel data:
-    wheel_data_pub_.reset(new realtime_tools::RealtimePublisher<WheelData>(controller_nh, "wheel_data", 100));
+    wheel_data_pub_.reset(new realtime_tools::RealtimePublisher<WheelDataStamped>(controller_nh, "wheel_data", 100));
 
-    wheel_data_pub_->msg_.left_wheel_joint_names.resize(wheel_joints_size_);
-    wheel_data_pub_->msg_.right_wheel_joint_names.resize(wheel_joints_size_);
+    // no frame
+    wheel_data_pub_->msg_.header.frame_id = "0";
 
-    wheel_data_pub_->msg_.left_wheel_joint_actual_position.resize(wheel_joints_size_, 0.0);
-    wheel_data_pub_->msg_.right_wheel_joint_actual_position.resize(wheel_joints_size_, 0.0);
+    wheel_data_pub_->msg_.data.left_wheel_joint_names.resize(wheel_joints_size_);
+    wheel_data_pub_->msg_.data.right_wheel_joint_names.resize(wheel_joints_size_);
 
-    wheel_data_pub_->msg_.left_wheel_joint_actual_velocity.resize(wheel_joints_size_);
-    wheel_data_pub_->msg_.right_wheel_joint_actual_velocity.resize(wheel_joints_size_);
+    wheel_data_pub_->msg_.data.left_wheel_joint_actual_position.resize(wheel_joints_size_, 0.0);
+    wheel_data_pub_->msg_.data.right_wheel_joint_actual_position.resize(wheel_joints_size_, 0.0);
 
-    wheel_data_pub_->msg_.left_wheel_joint_reference_velocity.resize(wheel_joints_size_);
-    wheel_data_pub_->msg_.right_wheel_joint_reference_velocity.resize(wheel_joints_size_);
+    wheel_data_pub_->msg_.data.left_wheel_joint_actual_velocity.resize(wheel_joints_size_);
+    wheel_data_pub_->msg_.data.right_wheel_joint_actual_velocity.resize(wheel_joints_size_);
+
+    wheel_data_pub_->msg_.data.left_wheel_joint_reference_velocity.resize(wheel_joints_size_);
+    wheel_data_pub_->msg_.data.right_wheel_joint_reference_velocity.resize(wheel_joints_size_);
 
     for (size_t i = 0; i < wheel_joints_size_; ++i)
     {
-      wheel_data_pub_->msg_.left_wheel_joint_names[i]  = left_wheel_names[i];
-      wheel_data_pub_->msg_.right_wheel_joint_names[i] = right_wheel_names[i];
+      wheel_data_pub_->msg_.data.left_wheel_joint_names[i]  = left_wheel_names[i];
+      wheel_data_pub_->msg_.data.right_wheel_joint_names[i] = right_wheel_names[i];
     }
 
     // Get the joint object to use in the realtime loop
-    for (int i = 0; i < wheel_joints_size_; ++i)
+    for (size_t i = 0; i < wheel_joints_size_; ++i)
     {
       ROS_INFO_STREAM_NAMED(name_,
                             "Adding left wheel with joint name: " << left_wheel_names[i]
@@ -404,6 +407,8 @@ namespace diff_drive_controller{
     // Publish wheel data:
     if (publish_wheel_data_ && wheel_data_pub_->trylock())
     {
+      wheel_data_pub_->msg_.header.stamp = time;
+
       for (size_t i = 0; i < wheel_joints_size_; ++i)
       {
         //if (estimate_velocity_from_position_)
@@ -413,15 +418,15 @@ namespace diff_drive_controller{
         //}
         //else
         //{
-        wheel_data_pub_->msg_.left_wheel_joint_actual_velocity[i]  = left_wheel_joints_[i].getVelocity();
-        wheel_data_pub_->msg_.right_wheel_joint_actual_velocity[i] = right_wheel_joints_[i].getVelocity();
+        wheel_data_pub_->msg_.data.left_wheel_joint_actual_velocity[i]  = left_wheel_joints_[i].getVelocity();
+        wheel_data_pub_->msg_.data.right_wheel_joint_actual_velocity[i] = right_wheel_joints_[i].getVelocity();
         //}
 
-        wheel_data_pub_->msg_.left_wheel_joint_actual_position[i]  = left_wheel_joints_[i].getPosition();
-        wheel_data_pub_->msg_.right_wheel_joint_actual_position[i] = right_wheel_joints_[i].getPosition();
+        wheel_data_pub_->msg_.data.left_wheel_joint_actual_position[i]  = left_wheel_joints_[i].getPosition();
+        wheel_data_pub_->msg_.data.right_wheel_joint_actual_position[i] = right_wheel_joints_[i].getPosition();
 
-        wheel_data_pub_->msg_.left_wheel_joint_reference_velocity[i]  = vel_left;
-        wheel_data_pub_->msg_.right_wheel_joint_reference_velocity[i] = vel_right;
+        wheel_data_pub_->msg_.data.left_wheel_joint_reference_velocity[i]  = vel_left;
+        wheel_data_pub_->msg_.data.right_wheel_joint_reference_velocity[i] = vel_right;
       }
       wheel_data_pub_->unlockAndPublish();
     }

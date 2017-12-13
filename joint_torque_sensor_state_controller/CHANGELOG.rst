@@ -58,6 +58,26 @@ Changelog for package joint_torque_sensor_state_controller
 0.7.1 (2014-03-31)
 ------------------
 
+0.2.9 (2017-10-10)
+------------------
+* 0.2.8
+* Updated changelog
+* updated changelog
+* first draft of safe joint mode switch for joint_trajectory_controller, there is a bug do to the fact that all actuators don't swith at the same time
+* 0.2.7
+* Updated changelog
+* 0.2.6
+* Updated changelog
+* Updated changelogs
+* Added new changelogs
+* Added actuator mode state controller
+* Added temperature monitor
+* Initial implementation of joint torque sensor controller and temperature controller
+* Contributors: Hilario Tome
+
+0.3.0 (2017-10-10)
+------------------
+
 0.6.0 (2014-02-05)
 ------------------
 
