@@ -9,7 +9,8 @@ set(${PROJECT_NAME}_CATKIN_DEPS
     four_wheel_steering_msgs
     realtime_tools
     tf
-    urdf_geometry_parser)
+    urdf_geometry_parser
+    controller_manager)
 
 find_package(catkin REQUIRED COMPONENTS ${${PROJECT_NAME}_CATKIN_DEPS})
 
