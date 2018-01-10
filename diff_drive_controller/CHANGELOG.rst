@@ -2,8 +2,8 @@
 Changelog for package diff_drive_controller
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.1 (2018-01-10)
+------------------
 * increased tolerance in diff drive test from 0.03 to 0.04 in orientation
 * removed changelogs
 * consistent package versions

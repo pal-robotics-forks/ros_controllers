@@ -2,8 +2,8 @@
 Changelog for package four_wheel_steering_controller
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.1 (2018-01-10)
+------------------
 * consistent package versions
 * added extra controllers
 * Merge pull request #306 from vincentrou/fix_orientation_test

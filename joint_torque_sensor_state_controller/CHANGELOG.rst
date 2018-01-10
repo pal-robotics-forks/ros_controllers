@@ -2,8 +2,8 @@
 Changelog for package joint_torque_sensor_state_controller
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.1 (2018-01-10)
+------------------
 * removed changelogs
 * consistent package versions
 * added extra controllers
