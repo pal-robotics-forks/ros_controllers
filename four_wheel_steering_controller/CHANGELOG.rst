@@ -32,8 +32,8 @@ Changelog for package four_wheel_steering_controller
 * Add four_wheel_steering_controller
 * Contributors: Bence Magyar, Hilario Tome, Vincent Rousseau
 
-Forthcoming
------------
+0.3.2 (2018-01-12)
+------------------
 * fixed compilation erro
 * Contributors: Hilario Tome
 

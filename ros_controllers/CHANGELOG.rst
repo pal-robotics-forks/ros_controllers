@@ -9,8 +9,8 @@ Changelog for package ros_controllers
 * added extra controllers
 * Contributors: Hilario Tome
 
-Forthcoming
------------
+0.3.2 (2018-01-12)
+------------------
 
 0.13.1 (2017-11-06)
 -------------------
