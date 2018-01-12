@@ -8,6 +8,9 @@ Changelog for package effort_controllers
 * consistent package versions
 * Contributors: Hilario Tome
 
+Forthcoming
+-----------
+
 0.13.1 (2017-11-06)
 -------------------
 * Update changelogs

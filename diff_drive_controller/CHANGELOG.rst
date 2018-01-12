@@ -9,6 +9,9 @@ Changelog for package diff_drive_controller
 * consistent package versions
 * Contributors: Hilario Tome
 
+Forthcoming
+-----------
+
 0.13.1 (2017-11-06)
 -------------------
 * Update changelogs

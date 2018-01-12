@@ -9,6 +9,9 @@ Changelog for package temperature_sensor_controller
 * added extra controllers
 * Contributors: Hilario Tome
 
+Forthcoming
+-----------
+
 0.13.1 (2017-11-06)
 -------------------
 
