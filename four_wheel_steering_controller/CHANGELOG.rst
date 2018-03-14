@@ -37,8 +37,8 @@ Changelog for package four_wheel_steering_controller
 * fixed compilation erro
 * Contributors: Hilario Tome
 
-Forthcoming
------------
+0.3.3 (2018-03-14)
+------------------
 
 0.13.1 (2017-11-06)
 -------------------

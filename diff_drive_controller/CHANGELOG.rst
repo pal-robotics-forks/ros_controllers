@@ -12,8 +12,8 @@ Changelog for package diff_drive_controller
 0.3.2 (2018-01-12)
 ------------------
 
-Forthcoming
------------
+0.3.3 (2018-03-14)
+------------------
 * Merge branch 'dub-port/warnings' into 'erbium-devel'
   Dub port/warnings
   See merge request control/ros_controllers!25
