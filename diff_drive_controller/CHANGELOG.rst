@@ -12,6 +12,25 @@ Changelog for package diff_drive_controller
 0.3.2 (2018-01-12)
 ------------------
 
+Forthcoming
+-----------
+* Merge branch 'dub-port/warnings' into 'erbium-devel'
+  Dub port/warnings
+  See merge request control/ros_controllers!25
+* Merge branch 'dub-port/per_wheel_multiplier' into 'erbium-devel'
+  Dub port/per wheel multiplier
+  See merge request control/ros_controllers!26
+* duplicate gtest diff_drive_multipliers
+  duplicate to test left/right wheel multipliers
+* per wheel radius multiplier
+  Conflicts:
+  diff_drive_controller/src/diff_drive_controller.cpp
+* fix warning
+* separate include_directories
+  ${catkin_INCLUDE_DIRS} as SYSTEM to avoid unrelated
+  compilation warning spamming
+* Contributors: Hilario Tome, Jeremie Deray
+
 0.13.1 (2017-11-06)
 -------------------
 * Update changelogs
