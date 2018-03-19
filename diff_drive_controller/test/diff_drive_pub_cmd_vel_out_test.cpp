@@ -34,10 +34,8 @@ TEST_F(DiffDriveControllerTest, testCmdVelOutTopic)
 {
   // wait for ROS
   waitForController();
-  // msgs are published in the same loop
-  // thus if odom is published cmd_vel_out
-  // should be as well (if enabled)
-  waitForOdomMsgs();
+  // wait for the publisher/subscriber wiring to be made
+  waitForCmdVelOutMsgs();
 
   EXPECT_TRUE(isPublishingCmdVelOut());
 
