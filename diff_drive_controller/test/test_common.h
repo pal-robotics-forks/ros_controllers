@@ -53,6 +53,7 @@ public:
 
   DiffDriveControllerTest()
   : received_first_odom(false)
+  , received_first_cmd_vel_out(false)
   , cmd_pub(nh.advertise<geometry_msgs::Twist>("cmd_vel", 100))
   , odom_sub(nh.subscribe("odom", 100, &DiffDriveControllerTest::odomCallback, this))
   , vel_out_sub(nh.subscribe("cmd_vel_out", 100, &DiffDriveControllerTest::cmdVelOutCallback, this))
@@ -72,6 +73,7 @@ public:
   bool isControllerAlive()const{ return (odom_sub.getNumPublishers() > 0) && (cmd_pub.getNumSubscribers() > 0); }
   bool isPublishingCmdVelOut()const{ return (vel_out_sub.getNumPublishers() > 0); }
   bool hasReceivedFirstOdom()const{ return received_first_odom; }
+  bool hasReceivedFirstCmdVelOut()const{ return received_first_cmd_vel_out; }
 
   void start(){ std_srvs::Empty srv; start_srv.call(srv); }
   void stop(){ std_srvs::Empty srv; stop_srv.call(srv); }
@@ -98,8 +100,19 @@ public:
       FAIL() << "Something went wrong while executing test.";
   }
 
+  void waitForCmdVelOutMsgs() const
+  {
+    while(!hasReceivedFirstCmdVelOut() && ros::ok())
+    {
+      ROS_DEBUG_STREAM_THROTTLE(0.5, "Waiting for odom messages to be published.");
+      ros::Duration(0.01).sleep();
+    }
+    if (!ros::ok())
+      FAIL() << "Something went wrong while executing test.";
+  }
+
 private:
-  bool received_first_odom;
+  bool received_first_odom, received_first_cmd_vel_out;
   ros::NodeHandle nh;
   ros::Publisher cmd_pub;
   ros::Subscriber odom_sub;
@@ -125,6 +138,7 @@ private:
     ROS_INFO_STREAM("Callback received: lin: " << cmd_vel_out.twist.linear.x
                      << ", ang: " << cmd_vel_out.twist.angular.z);
     last_cmd_vel_out = cmd_vel_out;
+    received_first_cmd_vel_out = true;
   }
 };
 
