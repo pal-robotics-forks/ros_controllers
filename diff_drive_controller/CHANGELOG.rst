@@ -31,8 +31,8 @@ Changelog for package diff_drive_controller
   compilation warning spamming
 * Contributors: Hilario Tome, Jeremie Deray
 
-Forthcoming
------------
+0.3.4 (2018-03-28)
+------------------
 * Merge branch 'gtest/fixes' into 'erbium-devel'
   gtest waitForCmdVelOutMsgs
   See merge request control/ros_controllers!30
