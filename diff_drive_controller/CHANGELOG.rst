@@ -31,6 +31,36 @@ Changelog for package diff_drive_controller
   compilation warning spamming
 * Contributors: Hilario Tome, Jeremie Deray
 
+Forthcoming
+-----------
+* Merge branch 'gtest/fixes' into 'erbium-devel'
+  gtest waitForCmdVelOutMsgs
+  See merge request control/ros_controllers!30
+* fix xacro macro warning
+* skidsteerbot publishes its own clock
+* Merge branch 'dynamic_reconf' into 'erbium-devel'
+  Dynamic reconf
+  See merge request control/ros_controllers!28
+* skid_steer_common use_sim_time
+* fix testTurn
+* gtest waitForCmdVelOutMsgs
+* Merge branch 'gtest/fixes' into 'erbium-devel'
+  Gtest/fixes
+  See merge request control/ros_controllers!27
+* diffbot simulation clock
+* gtest dynamic_reconf
+* add dynamic_reconf to diff_drive_controller
+* fix fail_test
+* fix multiple_cmd_vel_publishers_test
+* fix pub_cmd_vel_out_test
+* fix default_cmd_vel_out_test
+* fix diff_drive_test
+* fix default_odom_frame_test
+* fixe odom_frame_test
+  avoid testing on a default constructed message.
+* gtest add func waitForController & waitForOdomMsgs
+* Contributors: Hilario Tome, Jeremie Deray, Victor Lopez
+
 0.13.1 (2017-11-06)
 -------------------
 * Update changelogs

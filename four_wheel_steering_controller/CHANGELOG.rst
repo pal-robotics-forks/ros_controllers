@@ -40,6 +40,15 @@ Changelog for package four_wheel_steering_controller
 0.3.3 (2018-03-14)
 ------------------
 
+Forthcoming
+-----------
+* Merge branch 'gtest/fixes' into 'erbium-devel'
+  Gtest/fixes
+  See merge request control/ros_controllers!27
+* 4ws test simulation clock
+* fix 4ws tests
+* Contributors: Jeremie Deray, Victor Lopez
+
 0.13.1 (2017-11-06)
 -------------------
 
