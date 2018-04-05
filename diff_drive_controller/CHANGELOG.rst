@@ -61,8 +61,8 @@ Changelog for package diff_drive_controller
 * gtest add func waitForController & waitForOdomMsgs
 * Contributors: Hilario Tome, Jeremie Deray, Victor Lopez
 
-Forthcoming
------------
+0.3.5 (2018-04-05)
+------------------
 
 0.13.1 (2017-11-06)
 -------------------

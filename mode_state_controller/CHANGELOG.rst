@@ -18,8 +18,8 @@ Changelog for package mode_state_controller
 0.3.4 (2018-03-28)
 ------------------
 
-Forthcoming
------------
+0.3.5 (2018-04-05)
+------------------
 * Merge branch 'fixes' into 'erbium-devel'
   Fixes
   See merge request control/ros_controllers!31
