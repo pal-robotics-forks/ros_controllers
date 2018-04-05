@@ -18,6 +18,15 @@ Changelog for package mode_state_controller
 0.3.4 (2018-03-28)
 ------------------
 
+Forthcoming
+-----------
+* Merge branch 'fixes' into 'erbium-devel'
+  Fixes
+  See merge request control/ros_controllers!31
+* removed cmakelist user
+* removed cmakelist user
+* Contributors: Hilario Tome
+
 0.13.1 (2017-11-06)
 -------------------
 

@@ -49,6 +49,9 @@ Changelog for package four_wheel_steering_controller
 * fix 4ws tests
 * Contributors: Jeremie Deray, Victor Lopez
 
+Forthcoming
+-----------
+
 0.13.1 (2017-11-06)
 -------------------
 

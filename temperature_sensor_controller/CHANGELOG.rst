@@ -18,6 +18,15 @@ Changelog for package temperature_sensor_controller
 0.3.4 (2018-03-28)
 ------------------
 
+Forthcoming
+-----------
+* Merge branch 'fixes' into 'erbium-devel'
+  Fixes
+  See merge request control/ros_controllers!31
+* fixed plugin xml in temperature controller
+* fixed plugin xml in temperature controller
+* Contributors: Hilario Tome
+
 0.13.1 (2017-11-06)
 -------------------
 
