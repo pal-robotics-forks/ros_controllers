@@ -304,8 +304,11 @@ namespace diff_drive_controller{
       curr_cmd.ang = 0.0;
     }
 
-    // Limit velocities and accelerations:
-    const double cmd_dt(period.toSec());
+    // Compute elapsed time (equivalent but more accurate than period.toSec()):
+    curr_cmd.stamp = time;
+    const double cmd_dt((curr_cmd.stamp - last0_cmd_.stamp).toSec());
+
+    // Limit velocities/accelerations/jerks:
     const double f_lin = limiter_lin_.limit(curr_cmd.lin, last0_cmd_.lin, last1_cmd_.lin, cmd_dt);
     const double f_ang = limiter_ang_.limit(curr_cmd.ang, last0_cmd_.ang, last1_cmd_.ang, cmd_dt);
     if (preserve_turning_radius_ && f_lin != f_ang)
