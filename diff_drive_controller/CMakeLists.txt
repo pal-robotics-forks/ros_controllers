@@ -42,8 +42,17 @@ install(FILES diff_drive_controller_plugins.xml
     DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
 if (CATKIN_ENABLE_TESTING)
-  find_package(catkin REQUIRED COMPONENTS controller_manager rosgraph_msgs rostest std_srvs tf)
-  include_directories(include ${catkin_INCLUDE_DIRS})
+  find_package(catkin REQUIRED COMPONENTS
+    controller_manager
+    dynamic_reconfigure
+    rosgraph_msgs
+    rostest
+    std_srvs
+    tf
+  )
+
+  include_directories(include)
+  include_directories(SYSTEM ${catkin_INCLUDE_DIRS})
 
   add_executable(diffbot test/diffbot.cpp)
   target_link_libraries(diffbot ${catkin_LIBRARIES})
@@ -111,4 +120,5 @@ if (CATKIN_ENABLE_TESTING)
     test/diff_drive_dyn_reconf.test
     test/diff_drive_dyn_reconf_test.cpp)
   target_link_libraries(diff_drive_dyn_reconf_test ${catkin_LIBRARIES})
+  add_dependencies(diff_drive_dyn_reconf_test ${PROJECT_NAME}_gencfg)
 endif()

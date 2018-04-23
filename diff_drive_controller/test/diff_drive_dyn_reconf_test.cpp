@@ -28,9 +28,13 @@
 /// \author Jeremie Deray
 
 #include "test_common.h"
+
+#include "diff_drive_controller/DiffDriveControllerConfig.h"
+
 #include <tf/transform_listener.h>
 
 #include <dynamic_reconfigure/server.h>
+#include <dynamic_reconfigure/client.h>
 
 // TEST CASES
 TEST_F(DiffDriveControllerTest, testDynReconfServerAlive)
@@ -134,7 +138,6 @@ TEST_F(DiffDriveControllerTest, testDynReconfServerAlive)
   }
 }
 
-// TEST CASES
 TEST_F(DiffDriveControllerTest, testDynReconfEnableTf)
 {
   // wait for ROS
@@ -165,6 +168,68 @@ TEST_F(DiffDriveControllerTest, testDynReconfEnableTf)
   ros::Duration(2.0).sleep();
   // check the odom frame doesn't exist
   EXPECT_TRUE(listener.frameExists("odom"));
+}
+
+TEST_F(DiffDriveControllerTest, testDynReconfClient)
+{
+  // wait for ROS
+  while(!isControllerAlive() && ros::ok())
+  {
+    ros::Duration(0.1).sleep();
+  }
+  if (!ros::ok())
+    FAIL() << "Something went wrong while executing test";
+
+  typedef diff_drive_controller::DiffDriveControllerConfig Config;
+
+  dynamic_reconfigure::Client<Config> client("/diffbot_controller");
+
+  // Assert one can get default params through dyn_reconf srv
+  Config default_config;
+  EXPECT_TRUE(client.getDefaultConfiguration(default_config, ros::Duration(0.5)));
+
+  EXPECT_EQ(1,    default_config.left_wheel_radius_multiplier);
+  EXPECT_EQ(1,    default_config.right_wheel_radius_multiplier);
+  EXPECT_EQ(1,    default_config.wheel_separation_multiplier);
+  EXPECT_EQ(true, default_config.enable_odom_tf);
+  EXPECT_EQ(50,   default_config.publish_rate);
+
+  // Assert one can get current params through dyn_reconf srv
+  Config current_config;
+  EXPECT_TRUE(client.getCurrentConfiguration(current_config, ros::Duration(0.5)));
+
+  // Assert one can set params through dyn_reconf srv
+
+  Config new_config;
+
+  new_config.left_wheel_radius_multiplier  = 1.0123456;
+  new_config.right_wheel_radius_multiplier = 1.0123456;
+  new_config.wheel_separation_multiplier   = 1.0123456;
+
+  /// @todo check default value
+  new_config.enable_odom_tf = false;
+  new_config.publish_rate = 42;
+
+  EXPECT_TRUE(client.setConfiguration(new_config));
+
+  ros::Duration(0.1).sleep();
+
+  EXPECT_TRUE(client.getCurrentConfiguration(current_config, ros::Duration(0.5)));
+
+  EXPECT_EQ(new_config.left_wheel_radius_multiplier,
+            current_config.left_wheel_radius_multiplier);
+
+  EXPECT_EQ(new_config.right_wheel_radius_multiplier,
+            current_config.right_wheel_radius_multiplier);
+
+  EXPECT_EQ(new_config.wheel_separation_multiplier,
+            current_config.wheel_separation_multiplier);
+
+  EXPECT_EQ(new_config.enable_odom_tf,
+            current_config.enable_odom_tf);
+
+  EXPECT_EQ(new_config.publish_rate,
+            current_config.publish_rate);
 }
 
 int main(int argc, char** argv)
