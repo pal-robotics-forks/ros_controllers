@@ -331,20 +331,26 @@ namespace diff_drive_controller{
     dynamic_params.publish_rate = publish_rate;
     dynamic_params.enable_odom_tf = enable_odom_tf_;
 
-    dynamic_params_.writeFromNonRT(dynamic_params);
+    dynamic_params_.initRT(dynamic_params);
 
     // Initialize dynamic_reconfigure server
-    DiffDriveControllerConfig config;
-    config.left_wheel_radius_multiplier  = left_wheel_radius_multiplier_;
-    config.right_wheel_radius_multiplier = right_wheel_radius_multiplier_;
-    config.wheel_separation_multiplier   = wheel_separation_multiplier_;
-
-    config.publish_rate = publish_rate;
-    config.enable_odom_tf = enable_odom_tf_;
-
     dyn_reconf_server_ = boost::make_shared<ReconfigureServer>(controller_nh);
-    dyn_reconf_server_->updateConfig(config);
-    dyn_reconf_server_->setCallback(boost::bind(&DiffDriveController::reconfCallback, this, _1, _2));
+
+    if (dyn_reconf_server_ != NULL)
+    {
+      DiffDriveControllerConfig config;
+      config.left_wheel_radius_multiplier  = left_wheel_radius_multiplier_;
+      config.right_wheel_radius_multiplier = right_wheel_radius_multiplier_;
+      config.wheel_separation_multiplier   = wheel_separation_multiplier_;
+
+      config.publish_rate = publish_rate;
+      config.enable_odom_tf = enable_odom_tf_;
+
+      dyn_reconf_server_->updateConfig(config);
+      dyn_reconf_server_->setCallback(boost::bind(&DiffDriveController::reconfCallback, this, _1, _2));
+    }
+    else
+      ROS_WARN("Failed to initialize dynamic_reconfigure server !");
 
     return true;
   }
