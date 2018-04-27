@@ -305,6 +305,7 @@ class JointTrajectoryController(Plugin):
         running_jtc = self._running_jtc_info()
         self._joint_names = next(_jtc_joint_names(x) for x in running_jtc
                                  if x.name == self._jtc_name)
+
         for name in self._joint_names:
             self._joint_pos[name] = {}
 
@@ -383,6 +384,7 @@ class JointTrajectoryController(Plugin):
         jtc_list = filter_by_type(controller_list,
                                   'JointTrajectoryController',
                                   match_substring=True)
+        jtc_list.extend(filter_by_type(controller_list, 'pal_wbc/', match_substring=True))
         running_jtc_list = filter_by_state(jtc_list, 'running')
         return running_jtc_list
 
@@ -449,7 +451,11 @@ def _jtc_joint_names(jtc_info):
     # NOTE: We assume that there is at least one hardware interface that
     # claims resources (there should be), and the resource list is fetched
     # from the first available interface
-    return jtc_info.claimed_resources[0].resources
+    #return jtc_info.claimed_resources[0].resources
+    names = [];
+    for claimed_res in jtc_info.claimed_resources:
+        names.extend(claimed_res.resources)
+    return names
 
 def _resolve_controller_ns(cm_ns, controller_name):
     """
