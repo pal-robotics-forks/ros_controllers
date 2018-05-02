@@ -64,8 +64,8 @@ Changelog for package diff_drive_controller
 0.3.5 (2018-04-05)
 ------------------
 
-Forthcoming
------------
+0.3.6 (2018-05-02)
+------------------
 * Merge branch 'diffdrive_small_fix' into 'erbium-devel'
   call initRT rather than writeFromNonRT on init
   See merge request control/ros_controllers!33
