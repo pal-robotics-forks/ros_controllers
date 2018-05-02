@@ -27,6 +27,9 @@ Changelog for package mode_state_controller
 * removed cmakelist user
 * Contributors: Hilario Tome
 
+Forthcoming
+-----------
+
 0.13.1 (2017-11-06)
 -------------------
 

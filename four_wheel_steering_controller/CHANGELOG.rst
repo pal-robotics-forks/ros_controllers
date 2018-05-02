@@ -52,6 +52,9 @@ Changelog for package four_wheel_steering_controller
 0.3.5 (2018-04-05)
 ------------------
 
+Forthcoming
+-----------
+
 0.13.1 (2017-11-06)
 -------------------
 

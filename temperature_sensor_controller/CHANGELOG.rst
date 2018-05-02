@@ -27,6 +27,9 @@ Changelog for package temperature_sensor_controller
 * fixed plugin xml in temperature controller
 * Contributors: Hilario Tome
 
+Forthcoming
+-----------
+
 0.13.1 (2017-11-06)
 -------------------
 

@@ -20,6 +20,9 @@ Changelog for package velocity_controllers
 0.3.5 (2018-04-05)
 ------------------
 
+Forthcoming
+-----------
+
 0.13.1 (2017-11-06)
 -------------------
 * Update changelogs
