@@ -5,6 +5,15 @@ Changelog for package pal_joint_trajectory_controller
 Forthcoming
 -----------
 * updated changelog
+* updated changelog
+* Merge branch 'as_dynamic_trajectory' into 'erbium-devel'
+  pal_joint_trajectory_controller + fixes in rqt_joint_trajectory_controller
+  See merge request control/ros_controllers!35
+* Drop misleading parts of README.md
+* pal_joint_trajectory_controller + fixes in rqt_joint_trajectory_controller
+* Contributors: Hilario Tome, alexandersherikov
+
+* updated changelog
 * Merge branch 'as_dynamic_trajectory' into 'erbium-devel'
   pal_joint_trajectory_controller + fixes in rqt_joint_trajectory_controller
   See merge request control/ros_controllers!35

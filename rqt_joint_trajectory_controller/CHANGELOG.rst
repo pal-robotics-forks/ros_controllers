@@ -23,6 +23,14 @@ Changelog for package rqt_joint_trajectory_controller
 0.3.6 (2018-05-02)
 ------------------
 
+Forthcoming
+-----------
+* Merge branch 'as_dynamic_trajectory' into 'erbium-devel'
+  pal_joint_trajectory_controller + fixes in rqt_joint_trajectory_controller
+  See merge request control/ros_controllers!35
+* pal_joint_trajectory_controller + fixes in rqt_joint_trajectory_controller
+* Contributors: Hilario Tome, alexandersherikov
+
 0.13.1 (2017-11-06)
 -------------------
 * Update changelogs
