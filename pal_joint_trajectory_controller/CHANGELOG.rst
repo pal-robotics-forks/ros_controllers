@@ -2,8 +2,8 @@
 Changelog for package pal_joint_trajectory_controller
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.7 (2018-05-07)
+------------------
 * updated changelog
 * updated changelog
 * Merge branch 'as_dynamic_trajectory' into 'erbium-devel'

@@ -72,8 +72,8 @@ Changelog for package diff_drive_controller
 * call initRT rather than writeFromNonRT on init
 * Contributors: Hilario Tome, Jeremie Deray
 
-Forthcoming
------------
+0.3.7 (2018-05-07)
+------------------
 
 0.13.1 (2017-11-06)
 -------------------

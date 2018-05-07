@@ -1,7 +1,7 @@
 <package format="2">
   <name>pal_joint_trajectory_controller</name>
   <description> Controller for executing joint-space trajectories on a group of joints. </description>
-  <version>0.3.6</version>
+  <version>0.3.7</version>
 
   <maintainer email="alexander.sherikov@pal-robotics.com">Alexander Sherikov</maintainer>
 
