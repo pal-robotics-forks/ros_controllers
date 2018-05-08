@@ -31,8 +31,8 @@ Changelog for package rqt_joint_trajectory_controller
 * pal_joint_trajectory_controller + fixes in rqt_joint_trajectory_controller
 * Contributors: Hilario Tome, alexandersherikov
 
-Forthcoming
------------
+0.3.8 (2018-05-08)
+------------------
 
 0.13.1 (2017-11-06)
 -------------------
