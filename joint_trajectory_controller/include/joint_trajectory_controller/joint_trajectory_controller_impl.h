@@ -410,8 +410,14 @@ update(const ros::Time& time, const ros::Duration& period)
             ROS_ERROR_STREAM_NAMED(name_,"Path tolerances failed for joint: " << joint_names_[i]);
             checkStateTolerancePerJoint(state_joint_error_, joint_tolerances.state_tolerance, true);
           }
-          rt_segment_goal->preallocated_result_->error_code =
-          control_msgs::FollowJointTrajectoryResult::PATH_TOLERANCE_VIOLATED;
+          if(rt_segment_goal->preallocated_result_){
+            rt_segment_goal->preallocated_result_->error_code =
+            control_msgs::FollowJointTrajectoryResult::PATH_TOLERANCE_VIOLATED;
+          }
+          else{
+            ROS_ERROR_STREAM("rt_segment_goal->preallocated_result_ NULL Pointer, address is: "<< rt_segment_goal->preallocated_result_.get()<<
+                             " rt_segment_goal address: "<<rt_segment_goal.get());
+          }
           rt_segment_goal->setAborted(rt_segment_goal->preallocated_result_);
           rt_active_goal_.reset();
           successful_joint_traj_.reset();
