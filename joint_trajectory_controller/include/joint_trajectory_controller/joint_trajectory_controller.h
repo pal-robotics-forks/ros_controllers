@@ -148,6 +148,8 @@ public:
 
 private:
 
+  bool realtime_busy_;
+
   struct TimeData
   {
     TimeData() : time(0.0), period(0.0), uptime(0.0) {}

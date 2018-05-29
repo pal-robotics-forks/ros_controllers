@@ -173,6 +173,9 @@ preemptActiveGoal()
   if (current_active_goal)
   {
     // Marks the current goal as canceled
+   while(realtime_busy_){
+       ros::Duration(0.001).sleep();
+    }
     rt_active_goal_.reset();
     current_active_goal->gh_.setCanceled();
   }
@@ -200,6 +203,7 @@ bool JointTrajectoryController<SegmentImpl, HardwareInterface>::init(HardwareInt
                                                                      ros::NodeHandle&   root_nh,
                                                                      ros::NodeHandle&   controller_nh)
 {
+  realtime_busy_ = false;
   using namespace internal;
 
   // Cache controller node handle
@@ -347,6 +351,7 @@ template <class SegmentImpl, class HardwareInterface>
 void JointTrajectoryController<SegmentImpl, HardwareInterface>::
 update(const ros::Time& time, const ros::Duration& period)
 {
+  realtime_busy_ = true;
   // Get currently followed trajectory
   TrajectoryPtr curr_traj_ptr;
   curr_trajectory_box_.get(curr_traj_ptr);
@@ -410,17 +415,18 @@ update(const ros::Time& time, const ros::Duration& period)
             ROS_ERROR_STREAM_NAMED(name_,"Path tolerances failed for joint: " << joint_names_[i]);
             checkStateTolerancePerJoint(state_joint_error_, joint_tolerances.state_tolerance, true);
           }
-          if(rt_segment_goal->preallocated_result_){
+
+          if(rt_segment_goal && rt_segment_goal->preallocated_result_)
+          {
             rt_segment_goal->preallocated_result_->error_code =
             control_msgs::FollowJointTrajectoryResult::PATH_TOLERANCE_VIOLATED;
+            rt_segment_goal->setAborted(rt_segment_goal->preallocated_result_);
+            rt_active_goal_.reset();
+            successful_joint_traj_.reset();
           }
           else{
-            ROS_ERROR_STREAM("rt_segment_goal->preallocated_result_ NULL Pointer, address is: "<< rt_segment_goal->preallocated_result_.get()<<
-                             " rt_segment_goal address: "<<rt_segment_goal.get());
+            ROS_ERROR_STREAM("rt_segment_goal->preallocated_result_ NULL Pointer");
           }
-          rt_segment_goal->setAborted(rt_segment_goal->preallocated_result_);
-          rt_active_goal_.reset();
-          successful_joint_traj_.reset();
         }
       }
       else if (segment_it == --curr_traj[i].end())
@@ -452,8 +458,14 @@ update(const ros::Time& time, const ros::Duration& period)
             checkStateTolerancePerJoint(state_joint_error_, tolerances.goal_state_tolerance, true);
           }
 
-          rt_segment_goal->preallocated_result_->error_code = control_msgs::FollowJointTrajectoryResult::GOAL_TOLERANCE_VIOLATED;
-          rt_segment_goal->setAborted(rt_segment_goal->preallocated_result_);
+          if(rt_segment_goal){
+            rt_segment_goal->preallocated_result_->error_code = control_msgs::FollowJointTrajectoryResult::GOAL_TOLERANCE_VIOLATED;
+            rt_segment_goal->setAborted(rt_segment_goal->preallocated_result_);
+          }
+          else
+          {
+            ROS_ERROR_STREAM("rt_segment_goal->preallocated_result_ NULL Pointer");
+          }
           rt_active_goal_.reset();
           successful_joint_traj_.reset();
         }
@@ -463,7 +475,7 @@ update(const ros::Time& time, const ros::Duration& period)
 
   //If there is an active goal and all segments finished successfully then set goal as succeeded
   RealtimeGoalHandlePtr current_active_goal(rt_active_goal_);
-  if (current_active_goal and successful_joint_traj_.count() == joints_.size())
+  if (current_active_goal && current_active_goal->preallocated_result_ && successful_joint_traj_.count() == joints_.size())
   {
     current_active_goal->preallocated_result_->error_code = control_msgs::FollowJointTrajectoryResult::SUCCESSFUL;
     current_active_goal->setSucceeded(current_active_goal->preallocated_result_);
@@ -476,7 +488,7 @@ update(const ros::Time& time, const ros::Duration& period)
                                   desired_state_, state_error_);
 
   // Set action feedback
-  if (rt_active_goal_)
+  if (rt_active_goal_ && rt_active_goal_->preallocated_feedback_)
   {
     rt_active_goal_->preallocated_feedback_->header.stamp          = time_data_.readFromRT()->time;
     rt_active_goal_->preallocated_feedback_->desired.positions     = desired_state_.position;
@@ -491,6 +503,7 @@ update(const ros::Time& time, const ros::Duration& period)
 
   // Publish state
   publishState(time_data.uptime);
+  realtime_busy_ = false;
 }
 
 template <class SegmentImpl, class HardwareInterface>
@@ -624,6 +637,9 @@ goalCB(GoalHandle gh)
     // Accept new goal
     preemptActiveGoal();
     gh.setAccepted();
+    while(realtime_busy_){
+       ros::Duration(0.001).sleep();
+    }
     rt_active_goal_ = rt_goal;
 
     // Setup goal status checking timer
@@ -651,6 +667,9 @@ cancelCB(GoalHandle gh)
   if (current_active_goal && current_active_goal->gh_ == gh)
   {
     // Reset current goal
+    while(realtime_busy_){
+       ros::Duration(0.001).sleep();
+    }
     rt_active_goal_.reset();
 
     // Controller uptime
@@ -703,7 +722,7 @@ queryStateService(control_msgs::QueryTrajectoryState::Request&  req,
     response_point.velocity[i]     = state.velocity[0];
     response_point.acceleration[i] = state.acceleration[0];
   }
-  
+
   // Populate response
   resp.name         = joint_names_;
   resp.position     = response_point.position;
