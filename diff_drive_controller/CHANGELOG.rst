@@ -78,6 +78,14 @@ Changelog for package diff_drive_controller
 0.3.8 (2018-05-08)
 ------------------
 
+Forthcoming
+-----------
+* Merge branch 'dyn_reconf_client_test' into 'erbium-devel'
+  add dyn_reconf client test
+  See merge request control/ros_controllers!32
+* add dyn_reconf client test
+* Contributors: Hilario Tome, Jeremie Deray
+
 0.13.1 (2017-11-06)
 -------------------
 * Update changelogs

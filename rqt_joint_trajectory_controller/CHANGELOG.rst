@@ -34,6 +34,9 @@ Changelog for package rqt_joint_trajectory_controller
 0.3.8 (2018-05-08)
 ------------------
 
+Forthcoming
+-----------
+
 0.13.1 (2017-11-06)
 -------------------
 * Update changelogs

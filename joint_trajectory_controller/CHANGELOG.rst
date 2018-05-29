@@ -32,6 +32,16 @@ Changelog for package joint_trajectory_controller
 0.3.8 (2018-05-08)
 ------------------
 
+Forthcoming
+-----------
+* Merge branch 'feedback_null_pointer' into 'erbium-devel'
+  added safeguard for feedback null pointer
+  See merge request control/ros_controllers!36
+* Added protection for rt_active_goal\_ in callbacks
+* removed cmakeList.user
+* added safeguard for feedback null pointer
+* Contributors: Hilario Tome
+
 0.13.1 (2017-11-06)
 -------------------
 * Update changelogs
