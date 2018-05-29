@@ -32,8 +32,8 @@ Changelog for package joint_trajectory_controller
 0.3.8 (2018-05-08)
 ------------------
 
-Forthcoming
------------
+0.3.9 (2018-05-29)
+------------------
 * Merge branch 'feedback_null_pointer' into 'erbium-devel'
   added safeguard for feedback null pointer
   See merge request control/ros_controllers!36
