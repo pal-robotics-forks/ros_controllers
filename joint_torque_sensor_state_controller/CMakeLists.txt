@@ -39,6 +39,6 @@ install(TARGETS ${PROJECT_NAME}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   )
 
-install(FILES joint_torque_sensor_state_plugin.xml joint_torque_sensor_state_controller.yaml
+install(FILES joint_torque_sensor_state_plugin.xml joint_torque_sensor_state_controller.yaml joint_torque_sensor_state_controller.launch
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
