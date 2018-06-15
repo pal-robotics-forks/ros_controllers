@@ -86,6 +86,9 @@ Changelog for package diff_drive_controller
 * add dyn_reconf client test
 * Contributors: Hilario Tome, Jeremie Deray
 
+Forthcoming
+-----------
+
 0.13.1 (2017-11-06)
 -------------------
 * Update changelogs

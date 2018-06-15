@@ -42,6 +42,9 @@ Changelog for package joint_trajectory_controller
 * added safeguard for feedback null pointer
 * Contributors: Hilario Tome
 
+Forthcoming
+-----------
+
 0.13.1 (2017-11-06)
 -------------------
 * Update changelogs
