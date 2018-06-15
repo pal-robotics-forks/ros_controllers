@@ -33,8 +33,8 @@ Changelog for package joint_torque_sensor_state_controller
 0.3.9 (2018-05-29)
 ------------------
 
-Forthcoming
------------
+0.3.10 (2018-06-15)
+-------------------
 * Merge branch 'add-launch-file' into 'erbium-devel'
   Add launch file
   See merge request control/ros_controllers!40
