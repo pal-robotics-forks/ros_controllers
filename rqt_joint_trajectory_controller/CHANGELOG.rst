@@ -40,8 +40,8 @@ Changelog for package rqt_joint_trajectory_controller
 0.3.10 (2018-06-15)
 -------------------
 
-Forthcoming
------------
+0.3.11 (2018-06-19)
+-------------------
 * Merge branch 'as_rqt_jtc_fix_uncontrolled_joint' into 'erbium-devel'
   rqt_joint_trajectory_controller: allow partial control
   See merge request control/ros_controllers!39
