@@ -256,8 +256,9 @@ class JointTrajectoryController(Plugin):
         self._speed_scale = val / self._speed_scaling_widget.slider.maximum()
 
     def _on_joint_state_change(self, actual_pos):
-        assert(len(actual_pos) == len(self._joint_pos))
-        for name in actual_pos.keys():
+        #assert(len(actual_pos) == len(self._joint_pos))
+        #for name in actual_pos.keys():
+        for name in self._joint_pos.keys():
             self._joint_pos[name]['position'] = actual_pos[name]
 
     def _on_cm_change(self, cm_ns):
