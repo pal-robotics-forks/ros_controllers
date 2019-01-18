@@ -48,6 +48,9 @@ Changelog for package rqt_joint_trajectory_controller
 * rqt_joint_trajectory_controller: allow partial control
 * Contributors: Hilario Tome, alexandersherikov
 
+Forthcoming
+-----------
+
 0.13.1 (2017-11-06)
 -------------------
 * Update changelogs

@@ -48,6 +48,14 @@ Changelog for package joint_trajectory_controller
 0.3.11 (2018-06-19)
 -------------------
 
+Forthcoming
+-----------
+* Merge branch 'clang-fixes' into 'erbium-devel'
+  Clang fixes
+  See merge request control/ros_controllers!41
+* Clang fixes
+* Contributors: Victor Lopez
+
 0.13.1 (2017-11-06)
 -------------------
 * Update changelogs
