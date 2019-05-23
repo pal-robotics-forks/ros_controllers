@@ -51,8 +51,9 @@ if (CATKIN_ENABLE_TESTING)
     tf
   )
 
+  # use BEFORE to include directories to append directories better, when find_package catkin is used twice
   include_directories(include)
-  include_directories(SYSTEM ${catkin_INCLUDE_DIRS})
+  include_directories(BEFORE SYSTEM ${catkin_INCLUDE_DIRS})
 
   add_executable(diffbot test/diffbot.cpp)
   target_link_libraries(diffbot ${catkin_LIBRARIES})
