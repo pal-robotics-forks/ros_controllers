@@ -56,6 +56,15 @@ Changelog for package joint_trajectory_controller
 * Clang fixes
 * Contributors: Victor Lopez
 
+Forthcoming
+-----------
+* Merge branch 'controller_manager_fix' into 'erbium-devel'
+  added BEFORE to include_directories to control COMPONENTS include path
+  See merge request control/ros_controllers!43
+* added comment
+* added BEFORE to include_directories to control COMPONENTS include path
+* Contributors: Sai Kishor Kothakota, Victor Lopez
+
 0.13.1 (2017-11-06)
 -------------------
 * Update changelogs
