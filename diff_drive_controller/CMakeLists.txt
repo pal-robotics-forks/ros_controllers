@@ -51,6 +51,7 @@ if (CATKIN_ENABLE_TESTING)
     tf
   )
 
+  # use BEFORE to include directories to append directories better, when find_package catkin is used twice
   include_directories(include)
   include_directories(BEFORE SYSTEM ${catkin_INCLUDE_DIRS})
 

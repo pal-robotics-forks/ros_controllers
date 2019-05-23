@@ -59,6 +59,7 @@ if(CATKIN_ENABLE_TESTING)
   )
 
   find_package(rostest REQUIRED)
+  # use BEFORE to include directories to append directories better, when find_package catkin is used twice
   include_directories(BEFORE include ${catkin_INCLUDE_DIRS})
 
   catkin_add_gtest(quintic_spline_segment_test test/quintic_spline_segment_test.cpp)
