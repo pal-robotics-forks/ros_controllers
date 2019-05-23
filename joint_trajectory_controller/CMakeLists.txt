@@ -59,7 +59,7 @@ if(CATKIN_ENABLE_TESTING)
   )
 
   find_package(rostest REQUIRED)
-  include_directories(include ${catkin_INCLUDE_DIRS})
+  include_directories(BEFORE include ${catkin_INCLUDE_DIRS})
 
   catkin_add_gtest(quintic_spline_segment_test test/quintic_spline_segment_test.cpp)
   target_link_libraries(quintic_spline_segment_test ${catkin_LIBRARIES})
