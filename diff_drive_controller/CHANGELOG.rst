@@ -95,8 +95,8 @@ Changelog for package diff_drive_controller
 0.3.12 (2019-01-18)
 -------------------
 
-Forthcoming
------------
+0.3.13 (2019-05-23)
+-------------------
 * Merge branch 'controller_manager_fix' into 'erbium-devel'
   added BEFORE to include_directories to control COMPONENTS include path
   See merge request control/ros_controllers!43
