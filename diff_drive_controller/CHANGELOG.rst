@@ -104,6 +104,14 @@ Changelog for package diff_drive_controller
 * added BEFORE to include_directories to control COMPONENTS include path
 * Contributors: Sai Kishor Kothakota, Victor Lopez
 
+Forthcoming
+-----------
+* Merge branch 'gazebo_crash_fix' into 'erbium-devel'
+  added controller_manager to find_package and revert BEFORE changes
+  See merge request control/ros_controllers!44
+* added controller_manager to find_package and revert BEFORE changes
+* Contributors: Sai Kishor Kothakota, Victor Lopez
+
 0.13.1 (2017-11-06)
 -------------------
 * Update changelogs
