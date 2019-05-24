@@ -1,6 +1,6 @@
 <package format="2">
   <name>position_controllers</name>
-  <version>0.3.13</version>
+  <version>0.3.14</version>
   <description>position_controllers</description>
 
   <maintainer email="adolfo.rodriguez@pal-robotics.com">Adolfo Rodriguez Tsouroukdissian</maintainer>
