@@ -3,6 +3,12 @@ project(diff_drive_controller)
 
 find_package(catkin REQUIRED COMPONENTS
     controller_interface
+# controller_manager is only needed by this package's tests
+# but at runtime this package's library loads libraries from ros_control
+# if we don't link against a ros_control package in the workspace that
+# has shared libraries at runtime it will load libraries from outside the workspace
+# This can cause crashes due to ABI incompatibilities
+    controller_manager
     dynamic_reconfigure
     nav_msgs
     realtime_tools
@@ -51,9 +57,8 @@ if (CATKIN_ENABLE_TESTING)
     tf
   )
 
-  # use BEFORE to include directories to append directories better, when find_package catkin is used twice
   include_directories(include)
-  include_directories(BEFORE SYSTEM ${catkin_INCLUDE_DIRS})
+  include_directories(SYSTEM ${catkin_INCLUDE_DIRS})
 
   add_executable(diffbot test/diffbot.cpp)
   target_link_libraries(diffbot ${catkin_LIBRARIES})
