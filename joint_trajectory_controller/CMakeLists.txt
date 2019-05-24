@@ -11,6 +11,12 @@ find_package(catkin
     urdf
     control_toolbox
     controller_interface
+# controller_manager is only needed by this package's tests
+# but at runtime this package's library loads libraries from ros_control
+# if we don't link against a ros_control package in the workspace that
+# has shared libraries at runtime it will load libraries from outside the workspace
+# This can cause crashes due to ABI incompatibilities
+    controller_manager
     hardware_interface
     realtime_tools
     control_msgs
@@ -59,8 +65,7 @@ if(CATKIN_ENABLE_TESTING)
   )
 
   find_package(rostest REQUIRED)
-  # use BEFORE to include directories to append directories better, when find_package catkin is used twice
-  include_directories(BEFORE include ${catkin_INCLUDE_DIRS})
+  include_directories(include ${catkin_INCLUDE_DIRS})
 
   catkin_add_gtest(quintic_spline_segment_test test/quintic_spline_segment_test.cpp)
   target_link_libraries(quintic_spline_segment_test ${catkin_LIBRARIES})
