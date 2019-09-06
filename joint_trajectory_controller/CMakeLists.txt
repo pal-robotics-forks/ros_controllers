@@ -40,7 +40,8 @@ catkin_package(
   LIBRARIES ${PROJECT_NAME}
 )
 
-include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
+include_directories(include)
+include_directories(SYSTEM ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
 
 add_library(${PROJECT_NAME} src/joint_trajectory_controller.cpp
                             include/joint_trajectory_controller/hardware_interface_adapter.h
@@ -65,7 +66,8 @@ if(CATKIN_ENABLE_TESTING)
   )
 
   find_package(rostest REQUIRED)
-  include_directories(include ${catkin_INCLUDE_DIRS})
+  include_directories(include)
+  include_directories(SYSTEM ${catkin_INCLUDE_DIRS})
 
   catkin_add_gtest(quintic_spline_segment_test test/quintic_spline_segment_test.cpp)
   target_link_libraries(quintic_spline_segment_test ${catkin_LIBRARIES})

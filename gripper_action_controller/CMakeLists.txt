@@ -31,9 +31,8 @@ CATKIN_DEPENDS
   trajectory_msgs
 )
 
-include_directories(
-  include ${catkin_INCLUDE_DIRS}
-)
+include_directories(include)
+include_directories(SYSTEM ${catkin_INCLUDE_DIRS})
 
 add_library(gripper_action_controller
    src/gripper_action_controller.cpp

@@ -37,9 +37,9 @@ bool ModeStateController::init(hardware_interface::JointModeInterface* hw,
       std::vector<std::string> resource_names = hw->getNames();
       std::stringstream ss;
       ss << e.what() << std::endl << "Available resources: " << std::endl;
-      for (size_t i = 0; i < resource_names.size(); ++i)
+      for (size_t j = 0; j < resource_names.size(); ++j)
       {
-        ss << resource_names[i] << std::endl;
+        ss << resource_names[j] << std::endl;
       }
       throw hardware_interface::HardwareInterfaceException(ss.str());
     }

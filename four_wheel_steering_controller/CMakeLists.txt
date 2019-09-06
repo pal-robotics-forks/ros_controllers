@@ -20,9 +20,8 @@ catkin_package(
   CATKIN_DEPENDS ${${PROJECT_NAME}_CATKIN_DEPS}
 )
 
-include_directories(
-  include ${catkin_INCLUDE_DIRS}
-)
+include_directories(include)
+include_directories(SYSTEM ${catkin_INCLUDE_DIRS})
 
 add_library(${PROJECT_NAME} src/four_wheel_steering_controller.cpp src/odometry.cpp src/speed_limiter.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})

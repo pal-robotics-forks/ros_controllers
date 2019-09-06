@@ -12,7 +12,8 @@ find_package(catkin REQUIRED COMPONENTS
   urdf
 )
 
-include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
+include_directories(include)
+include_directories(SYSTEM ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
 
 # Declare catkin package
 catkin_package(

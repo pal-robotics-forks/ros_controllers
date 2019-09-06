@@ -694,13 +694,13 @@ TEST_F(InitTrajectoryTest, WrappingSpec)
 
   // Reference joint names size mismatch
   {
-    std::vector<bool> angle_wraparound(2, true);
-    InitJointTrajectoryOptions<Trajectory> options;
-    options.current_trajectory = &curr_traj;
-    options.angle_wraparound      = &angle_wraparound;
+    std::vector<bool> angle_wraparound_aux(2, true);
+    InitJointTrajectoryOptions<Trajectory> options_aux;
+    options_aux.current_trajectory = &curr_traj;
+    options_aux.angle_wraparound      = &angle_wraparound_aux;
 
-    Trajectory trajectory = initJointTrajectory<Trajectory>(trajectory_msg, trajectory_msg.header.stamp, options);
-    EXPECT_TRUE(trajectory.empty());
+    Trajectory trajectory_aux = initJointTrajectory<Trajectory>(trajectory_msg, trajectory_msg.header.stamp, options_aux);
+    EXPECT_TRUE(trajectory_aux.empty());
   }
 }
 
@@ -827,9 +827,9 @@ TEST_F(InitTrajectoryTest, OtherTimeBase)
 
     // Segment start time should correspond to message start time
     // Segment end time should correspond to first trajectory message point
-    const ros::Time msg_start_time = trajectory_msg.header.stamp;
-    const typename Segment::Time start_time = msg_start_time.toSec();
-    const typename Segment::Time end_time   = (msg_start_time +  msg_points[0].time_from_start).toSec();
+    const ros::Time bridge_msg_start_time = trajectory_msg.header.stamp;
+    const typename Segment::Time start_time = bridge_msg_start_time.toSec();
+    const typename Segment::Time end_time   = (bridge_msg_start_time +  msg_points[0].time_from_start).toSec();
 
     // Check start/end times
     {
@@ -841,7 +841,7 @@ TEST_F(InitTrajectoryTest, OtherTimeBase)
   // Check all segment start/end times and states (2 segments). Time offset does apply
   for (unsigned int traj_it = 2, msg_it = 0; traj_it < trajectory[0].size(); ++traj_it, ++msg_it)
   {
-    const ros::Time msg_start_time = trajectory_msg.header.stamp;
+    const ros::Time segment_msg_start_time = trajectory_msg.header.stamp;
     const vector<JointTrajectoryPoint>& msg_points = trajectory_msg.points;
 
     const Segment& segment = trajectory[0][traj_it];
@@ -850,8 +850,8 @@ TEST_F(InitTrajectoryTest, OtherTimeBase)
 
     // Check start/end times
     {
-      const typename Segment::Time start_time = (msg_start_time + p_start.time_from_start).toSec();
-      const typename Segment::Time end_time   = (msg_start_time + p_end.time_from_start).toSec();
+      const typename Segment::Time start_time = (segment_msg_start_time + p_start.time_from_start).toSec();
+      const typename Segment::Time end_time   = (segment_msg_start_time + p_end.time_from_start).toSec();
       EXPECT_EQ(start_time + time_offset.toSec(), segment.startTime()); // NOTE: offsets applied
       EXPECT_EQ(end_time   + time_offset.toSec(), segment.endTime());
     }
