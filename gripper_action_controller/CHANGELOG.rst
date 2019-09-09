@@ -47,6 +47,11 @@ Changelog for package gripper_action_controller
 0.3.14 (2019-05-24)
 -------------------
 
+Forthcoming
+-----------
+* Fixing shadowed variables errors
+* Contributors: Jordan Palacios
+
 0.13.1 (2017-11-06)
 -------------------
 * Update changelogs
