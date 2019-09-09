@@ -73,8 +73,8 @@ Changelog for package joint_trajectory_controller
 * added controller_manager to find_package and revert BEFORE changes
 * Contributors: Sai Kishor Kothakota, Victor Lopez
 
-Forthcoming
------------
+0.3.15 (2019-09-09)
+-------------------
 * Fixing shadowed variables errors
 * Contributors: Jordan Palacios
 

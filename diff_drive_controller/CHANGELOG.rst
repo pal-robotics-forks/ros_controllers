@@ -112,8 +112,8 @@ Changelog for package diff_drive_controller
 * added controller_manager to find_package and revert BEFORE changes
 * Contributors: Sai Kishor Kothakota, Victor Lopez
 
-Forthcoming
------------
+0.3.15 (2019-09-09)
+-------------------
 
 0.13.1 (2017-11-06)
 -------------------
