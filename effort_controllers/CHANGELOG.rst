@@ -52,6 +52,9 @@ Changelog for package effort_controllers
 * Fixing shadowed variables errors
 * Contributors: Jordan Palacios
 
+Forthcoming
+-----------
+
 0.13.1 (2017-11-06)
 -------------------
 * Update changelogs
