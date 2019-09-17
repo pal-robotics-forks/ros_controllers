@@ -78,8 +78,8 @@ Changelog for package joint_trajectory_controller
 * Fixing shadowed variables errors
 * Contributors: Jordan Palacios
 
-Forthcoming
------------
+0.3.16 (2019-09-17)
+-------------------
 * controller_manager is now a dependecy
 * Contributors: Jordan Palacios
 
