@@ -24,6 +24,7 @@
   <depend>control_msgs</depend>
   <depend>control_toolbox</depend>
   <depend>controller_interface</depend>
+  <depend>controller_manager</depend>
   <depend>hardware_interface</depend>
   <depend>realtime_tools</depend>
   <depend>roscpp</depend>
@@ -31,7 +32,6 @@
   <depend>urdf</depend>
 
   <test_depend>rostest</test_depend>
-  <test_depend>controller_manager</test_depend>
   <test_depend>xacro</test_depend>
 
   <export>
