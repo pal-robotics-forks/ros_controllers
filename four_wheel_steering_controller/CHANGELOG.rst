@@ -87,8 +87,8 @@ Changelog for package four_wheel_steering_controller
 0.3.16 (2019-09-17)
 -------------------
 
-Forthcoming
------------
+0.3.17 (2019-11-06)
+-------------------
 * Fix shadowed variables
 * Contributors: Victor Lopez
 
