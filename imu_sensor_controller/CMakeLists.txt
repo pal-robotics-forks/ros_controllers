@@ -22,7 +22,8 @@ catkin_package(
   LIBRARIES ${PROJECT_NAME}
   )
 
-include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
+include_directories(include)
+include_directories(SYSTEM ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
 
 add_library(${PROJECT_NAME}
   src/imu_sensor_controller.cpp 

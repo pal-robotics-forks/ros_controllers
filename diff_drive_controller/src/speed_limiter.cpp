@@ -50,25 +50,25 @@ namespace diff_drive_controller
 {
 
   SpeedLimiter::SpeedLimiter(
-    bool has_velocity_limits,
-    bool has_acceleration_limits,
-    bool has_jerk_limits,
-    double min_velocity,
-    double max_velocity,
-    double min_acceleration,
-    double max_acceleration,
-    double min_jerk,
-    double max_jerk
+    bool _has_velocity_limits,
+    bool _has_acceleration_limits,
+    bool _has_jerk_limits,
+    double _min_velocity,
+    double _max_velocity,
+    double _min_acceleration,
+    double _max_acceleration,
+    double _min_jerk,
+    double _max_jerk
   )
-  : has_velocity_limits(has_velocity_limits)
-  , has_acceleration_limits(has_acceleration_limits)
-  , has_jerk_limits(has_jerk_limits)
-  , min_velocity(min_velocity)
-  , max_velocity(max_velocity)
-  , min_acceleration(min_acceleration)
-  , max_acceleration(max_acceleration)
-  , min_jerk(min_jerk)
-  , max_jerk(max_jerk)
+  : has_velocity_limits(_has_velocity_limits)
+  , has_acceleration_limits(_has_acceleration_limits)
+  , has_jerk_limits(_has_jerk_limits)
+  , min_velocity(_min_velocity)
+  , max_velocity(_max_velocity)
+  , min_acceleration(_min_acceleration)
+  , max_acceleration(_max_acceleration)
+  , min_jerk(_min_jerk)
+  , max_jerk(_max_jerk)
   {
   }
 
