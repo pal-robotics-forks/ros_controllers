@@ -54,6 +54,9 @@ Changelog for package ros_controllers
 0.3.16 (2019-09-17)
 -------------------
 
+Forthcoming
+-----------
+
 0.13.1 (2017-11-06)
 -------------------
 * Update changelogs
