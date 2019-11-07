@@ -262,10 +262,10 @@ TEST_F(JointTrajectorySegmentTest, ValidSegmentConstructionRos)
 
   // Check start/end times
   {
-    const typename Segment::Time start_time = (traj_start_time + p_start.time_from_start).toSec();
-    const typename Segment::Time end_time   = (traj_start_time + p_end.time_from_start).toSec();
-    EXPECT_EQ(start_time, segment.startTime());
-    EXPECT_EQ(end_time,   segment.endTime());
+    const typename Segment::Time l_start_time = (traj_start_time + p_start.time_from_start).toSec();
+    const typename Segment::Time l_end_time   = (traj_start_time + p_end.time_from_start).toSec();
+    EXPECT_EQ(l_start_time, segment.startTime());
+    EXPECT_EQ(l_end_time,   segment.endTime());
   }
 
   // Check start state
@@ -293,10 +293,10 @@ TEST_F(JointTrajectorySegmentTest, ValidSegmentConstruction)
 
   // Check start/end times
   {
-    const typename Segment::Time start_time = (traj_start_time + p_start.time_from_start).toSec();
-    const typename Segment::Time end_time   = (traj_start_time + p_end.time_from_start).toSec();
-    EXPECT_EQ(start_time, segment.startTime());
-    EXPECT_EQ(end_time,   segment.endTime());
+    const typename Segment::Time l_start_time = (traj_start_time + p_start.time_from_start).toSec();
+    const typename Segment::Time l_end_time   = (traj_start_time + p_end.time_from_start).toSec();
+    EXPECT_EQ(l_start_time, segment.startTime());
+    EXPECT_EQ(l_end_time,   segment.endTime());
   }
 
   // Check start state
