@@ -58,6 +58,9 @@ Changelog for package effort_controllers
 0.3.17 (2019-11-06)
 -------------------
 
+Forthcoming
+-----------
+
 0.13.1 (2017-11-06)
 -------------------
 * Update changelogs

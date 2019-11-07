@@ -123,6 +123,9 @@ Changelog for package diff_drive_controller
 * Fix shadowed variables
 * Contributors: Victor Lopez
 
+Forthcoming
+-----------
+
 0.13.1 (2017-11-06)
 -------------------
 * Update changelogs

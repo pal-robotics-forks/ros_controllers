@@ -58,6 +58,9 @@ Changelog for package force_torque_sensor_controller
 * Fix shadowed variables
 * Contributors: Victor Lopez
 
+Forthcoming
+-----------
+
 0.13.1 (2017-11-06)
 -------------------
 * Update changelogs

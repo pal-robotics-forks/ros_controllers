@@ -64,6 +64,9 @@ Changelog for package joint_torque_sensor_state_controller
 * Fix shadowed variables
 * Contributors: Victor Lopez
 
+Forthcoming
+-----------
+
 0.13.1 (2017-11-06)
 -------------------
 
