@@ -86,8 +86,8 @@ Changelog for package joint_trajectory_controller
 0.3.17 (2019-11-06)
 -------------------
 
-Forthcoming
------------
+0.3.18 (2019-11-07)
+-------------------
 * Fix shadowed variables
 * Contributors: Victor Lopez
 

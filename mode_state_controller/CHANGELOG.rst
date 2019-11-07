@@ -67,8 +67,8 @@ Changelog for package mode_state_controller
 * Fix shadowed variables
 * Contributors: Victor Lopez
 
-Forthcoming
------------
+0.3.18 (2019-11-07)
+-------------------
 
 0.13.1 (2017-11-06)
 -------------------
