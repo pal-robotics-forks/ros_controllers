@@ -53,9 +53,16 @@ namespace force_torque_sensor_controller
       // sensor handle
       sensors_.push_back(hw->getHandle(sensor_names[i]));
 
-      // realtime publisher
-      RtPublisherPtr rt_pub(new realtime_tools::RealtimePublisher<geometry_msgs::WrenchStamped>(root_nh, sensor_names[i], 4));
-      realtime_pubs_.push_back(rt_pub);
+      // realtime publishers
+      RtWrenchPublisherPtr rt_wrench_pub(
+          new realtime_tools::RealtimePublisher<geometry_msgs::WrenchStamped>(
+              root_nh, sensor_names[i], 4));
+      wrench_pubs_.push_back(rt_wrench_pub);
+
+      RtTemperaturePublisherPtr rt_temperature_pub(
+          new realtime_tools::RealtimePublisher<sensor_msgs::Temperature>(
+              root_nh, sensor_names[i] + "_temperature", 4));
+      temperature_pubs_.push_back(rt_temperature_pub);
     }
 
     // Last published times
@@ -74,25 +81,35 @@ namespace force_torque_sensor_controller
   void ForceTorqueSensorController::update(const ros::Time& time, const ros::Duration& /*period*/)
   {
     // limit rate of publishing
-    for (unsigned i=0; i<realtime_pubs_.size(); i++){
+    for (unsigned i=0; i<wrench_pubs_.size(); i++){
       if (publish_rate_ > 0.0 && last_publish_times_[i] + ros::Duration(1.0/publish_rate_) < time){
         // try to publish
-        if (realtime_pubs_[i]->trylock()){
+        if (wrench_pubs_[i]->trylock()){
           // we're actually publishing, so increment time
           last_publish_times_[i] = last_publish_times_[i] + ros::Duration(1.0/publish_rate_);
 
           // populate message
-          realtime_pubs_[i]->msg_.header.stamp = time;
-          realtime_pubs_[i]->msg_.header.frame_id = sensors_[i].getFrameId();
+          wrench_pubs_[i]->msg_.header.stamp = time;
+          wrench_pubs_[i]->msg_.header.frame_id = sensors_[i].getFrameId();
 
-          realtime_pubs_[i]->msg_.wrench.force.x  = sensors_[i].getForce()[0];
-          realtime_pubs_[i]->msg_.wrench.force.y  = sensors_[i].getForce()[1];
-          realtime_pubs_[i]->msg_.wrench.force.z  = sensors_[i].getForce()[2];
-          realtime_pubs_[i]->msg_.wrench.torque.x = sensors_[i].getTorque()[0];
-          realtime_pubs_[i]->msg_.wrench.torque.y = sensors_[i].getTorque()[1];
-          realtime_pubs_[i]->msg_.wrench.torque.z = sensors_[i].getTorque()[2];
+          wrench_pubs_[i]->msg_.wrench.force.x  = sensors_[i].getForce()[0];
+          wrench_pubs_[i]->msg_.wrench.force.y  = sensors_[i].getForce()[1];
+          wrench_pubs_[i]->msg_.wrench.force.z  = sensors_[i].getForce()[2];
+          wrench_pubs_[i]->msg_.wrench.torque.x = sensors_[i].getTorque()[0];
+          wrench_pubs_[i]->msg_.wrench.torque.y = sensors_[i].getTorque()[1];
+          wrench_pubs_[i]->msg_.wrench.torque.z = sensors_[i].getTorque()[2];
 
-          realtime_pubs_[i]->unlockAndPublish();
+          wrench_pubs_[i]->unlockAndPublish();
+        }
+
+        if (temperature_pubs_[i]->trylock()){
+          // populate message
+          temperature_pubs_[i]->msg_.header.stamp = time;
+          temperature_pubs_[i]->msg_.header.frame_id = sensors_[i].getFrameId();
+
+          temperature_pubs_[i]->msg_.temperature = sensors_[i].getTemperature();
+
+          temperature_pubs_[i]->unlockAndPublish();
         }
       }
     }

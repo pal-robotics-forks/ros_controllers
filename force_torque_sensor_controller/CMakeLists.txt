@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
   pluginlib
   realtime_tools
   roscpp
+  sensor_msgs
 )
 
 # Declare catkin package
@@ -20,6 +21,7 @@ catkin_package(
     pluginlib
     realtime_tools
     roscpp
+    sensor_msgs
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
   )
