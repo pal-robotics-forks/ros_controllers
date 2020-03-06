@@ -61,6 +61,14 @@ Changelog for package force_torque_sensor_controller
 0.3.18 (2019-11-07)
 -------------------
 
+Forthcoming
+-----------
+* Merge branch 'ft_temperature' into 'erbium-devel'
+  Add FT sensor temperature report
+  See merge request control/ros_controllers!45
+* Added FT sensor temperature report
+* Contributors: Jordan Palacios, jordanpalacios
+
 0.13.1 (2017-11-06)
 -------------------
 * Update changelogs
