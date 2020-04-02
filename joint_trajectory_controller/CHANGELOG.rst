@@ -93,6 +93,12 @@ Changelog for package joint_trajectory_controller
 
 Forthcoming
 -----------
+* Merge branch 'hardware_adapter' into 'erbium-devel'
+  Decoupling joint_trajectory_controller hardware handler and adapter
+  See merge request control/ros_controllers!46
+* added tests for the new adapter template
+* Decoupling joint_trajectory_controller hardware handler and adapter
+* Contributors: Jordan Palacios, Sai Kishor Kothakota, jordanpalacios
 
 0.13.1 (2017-11-06)
 -------------------
