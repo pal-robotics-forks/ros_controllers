@@ -91,8 +91,8 @@ Changelog for package joint_trajectory_controller
 * Fix shadowed variables
 * Contributors: Victor Lopez
 
-Forthcoming
------------
+0.4.1 (2020-04-02)
+------------------
 * Merge branch 'hardware_adapter' into 'erbium-devel'
   Decoupling joint_trajectory_controller hardware handler and adapter
   See merge request control/ros_controllers!46
