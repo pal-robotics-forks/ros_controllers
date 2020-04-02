@@ -128,8 +128,8 @@ std::string getLeafNamespace(const ros::NodeHandle& nh)
 
 } // namespace
 
-template <class SegmentImpl, class HardwareInterface>
-inline void JointTrajectoryController<SegmentImpl, HardwareInterface>::
+template <class SegmentImpl, class HardwareInterface, class HardwareAdapter>
+inline void JointTrajectoryController<SegmentImpl, HardwareInterface, HardwareAdapter>::
 starting(const ros::Time& time)
 {
   // Update time data
@@ -148,23 +148,23 @@ starting(const ros::Time& time)
   hw_iface_adapter_.starting(time_data.uptime);
 }
 
-template <class SegmentImpl, class HardwareInterface>
-inline void JointTrajectoryController<SegmentImpl, HardwareInterface>::
+template <class SegmentImpl, class HardwareInterface, class HardwareAdapter>
+inline void JointTrajectoryController<SegmentImpl, HardwareInterface, HardwareAdapter>::
 stopping(const ros::Time& /*time*/)
 {
   preemptActiveGoal();
 }
 
-template <class SegmentImpl, class HardwareInterface>
-inline void JointTrajectoryController<SegmentImpl, HardwareInterface>::
+template <class SegmentImpl, class HardwareInterface, class HardwareAdapter>
+inline void JointTrajectoryController<SegmentImpl, HardwareInterface, HardwareAdapter>::
 trajectoryCommandCB(const JointTrajectoryConstPtr& msg)
 {
   const bool update_ok = updateTrajectoryCommand(msg, RealtimeGoalHandlePtr());
   if (update_ok) {preemptActiveGoal();}
 }
 
-template <class SegmentImpl, class HardwareInterface>
-inline void JointTrajectoryController<SegmentImpl, HardwareInterface>::
+template <class SegmentImpl, class HardwareInterface, class HardwareAdapter>
+inline void JointTrajectoryController<SegmentImpl, HardwareInterface, HardwareAdapter>::
 preemptActiveGoal()
 {
   RealtimeGoalHandlePtr current_active_goal(rt_active_goal_);
@@ -181,8 +181,8 @@ preemptActiveGoal()
   }
 }
 
-template <class SegmentImpl, class HardwareInterface>
-JointTrajectoryController<SegmentImpl, HardwareInterface>::
+template <class SegmentImpl, class HardwareInterface, class HardwareAdapter>
+JointTrajectoryController<SegmentImpl, HardwareInterface, HardwareAdapter>::
 JointTrajectoryController()
   : verbose_(false), // Set to true during debugging
     hold_trajectory_ptr_(new Trajectory)
@@ -198,8 +198,8 @@ JointTrajectoryController()
   }
 }
 
-template <class SegmentImpl, class HardwareInterface>
-bool JointTrajectoryController<SegmentImpl, HardwareInterface>::init(HardwareInterface* hw,
+template <class SegmentImpl, class HardwareInterface, class HardwareAdapter>
+bool JointTrajectoryController<SegmentImpl, HardwareInterface, HardwareAdapter>::init(HardwareInterface* hw,
                                                                      ros::NodeHandle&   root_nh,
                                                                      ros::NodeHandle&   controller_nh)
 {
@@ -347,8 +347,8 @@ bool JointTrajectoryController<SegmentImpl, HardwareInterface>::init(HardwareInt
   return true;
 }
 
-template <class SegmentImpl, class HardwareInterface>
-void JointTrajectoryController<SegmentImpl, HardwareInterface>::
+template <class SegmentImpl, class HardwareInterface, class HardwareAdapter>
+void JointTrajectoryController<SegmentImpl, HardwareInterface, HardwareAdapter>::
 update(const ros::Time& time, const ros::Duration& period)
 {
   realtime_busy_ = true;
@@ -506,8 +506,8 @@ update(const ros::Time& time, const ros::Duration& period)
   realtime_busy_ = false;
 }
 
-template <class SegmentImpl, class HardwareInterface>
-bool JointTrajectoryController<SegmentImpl, HardwareInterface>::
+template <class SegmentImpl, class HardwareInterface, class HardwareAdapter>
+bool JointTrajectoryController<SegmentImpl, HardwareInterface, HardwareAdapter>::
 updateTrajectoryCommand(const JointTrajectoryConstPtr& msg, RealtimeGoalHandlePtr gh)
 {
   typedef InitJointTrajectoryOptions<Trajectory> Options;
@@ -584,8 +584,8 @@ updateTrajectoryCommand(const JointTrajectoryConstPtr& msg, RealtimeGoalHandlePt
   return true;
 }
 
-template <class SegmentImpl, class HardwareInterface>
-void JointTrajectoryController<SegmentImpl, HardwareInterface>::
+template <class SegmentImpl, class HardwareInterface, class HardwareAdapter>
+void JointTrajectoryController<SegmentImpl, HardwareInterface, HardwareAdapter>::
 goalCB(GoalHandle gh)
 {
   ROS_DEBUG_STREAM_NAMED(name_,"Received new action goal");
@@ -657,8 +657,8 @@ goalCB(GoalHandle gh)
   }
 }
 
-template <class SegmentImpl, class HardwareInterface>
-void JointTrajectoryController<SegmentImpl, HardwareInterface>::
+template <class SegmentImpl, class HardwareInterface, class HardwareAdapter>
+void JointTrajectoryController<SegmentImpl, HardwareInterface, HardwareAdapter>::
 cancelCB(GoalHandle gh)
 {
   RealtimeGoalHandlePtr current_active_goal(rt_active_goal_);
@@ -684,8 +684,8 @@ cancelCB(GoalHandle gh)
   }
 }
 
-template <class SegmentImpl, class HardwareInterface>
-bool JointTrajectoryController<SegmentImpl, HardwareInterface>::
+template <class SegmentImpl, class HardwareInterface, class HardwareAdapter>
+bool JointTrajectoryController<SegmentImpl, HardwareInterface, HardwareAdapter>::
 queryStateService(control_msgs::QueryTrajectoryState::Request&  req,
                   control_msgs::QueryTrajectoryState::Response& resp)
 {
@@ -732,8 +732,8 @@ queryStateService(control_msgs::QueryTrajectoryState::Request&  req,
   return true;
 }
 
-template <class SegmentImpl, class HardwareInterface>
-void JointTrajectoryController<SegmentImpl, HardwareInterface>::
+template <class SegmentImpl, class HardwareInterface, class HardwareAdapter>
+void JointTrajectoryController<SegmentImpl, HardwareInterface, HardwareAdapter>::
 publishState(const ros::Time& time)
 {
   // Check if it's time to publish
@@ -757,8 +757,8 @@ publishState(const ros::Time& time)
   }
 }
 
-template <class SegmentImpl, class HardwareInterface>
-void JointTrajectoryController<SegmentImpl, HardwareInterface>::
+template <class SegmentImpl, class HardwareInterface, class HardwareAdapter>
+void JointTrajectoryController<SegmentImpl, HardwareInterface, HardwareAdapter>::
 setHoldPosition(const ros::Time& time, RealtimeGoalHandlePtr gh)
 {
   // Settle position in a fixed time. We do the following:
